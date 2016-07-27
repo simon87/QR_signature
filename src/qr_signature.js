@@ -1,11 +1,13 @@
 function qrSignature(){
 	/*Global variables*/
 	var canvas = document.getElementById('qr-canvas');
-	var canvWidth = 640;
-	var canvHeight = 480;
+	var canvWidth = 1024;
+	var canvHeight = 768;
 	var context = canvas.getContext('2d');
 	var operationCanvas = document.getElementById('operation-canvas');
 	var operationContext = operationCanvas.getContext('2d');
+	var originalCanvas = document.getElementById('original-canvas'); //For test only
+	var originalContext = originalCanvas.getContext('2d'); //For test only
 	var localStream;
 
 	var rotationDegree;
@@ -27,7 +29,19 @@ function qrSignature(){
 		}
 		contextData.putImageData(imageData, 0, 0);
 	}
-	/*Return with the distance between two coordinates*/
+	function imageColorCorrection(contextData){
+		var imageData = contextData.getImageData(0, 0, canvWidth, canvHeight);
+        var data = imageData.data;
+
+        for(var i = 0; i < data.length; i += 4) {
+          var brightness = 0.50 * data[i] + 0.5 * data[i + 1] + 0.16 * data[i + 2];
+          data[i] = brightness;
+          data[i + 1] = brightness;
+          data[i + 2] = brightness;
+        }
+        contextData.putImageData(imageData, 0, 0);
+	}
+	/*Returned with the distance between two coordinates*/
 	function lineDistance( point1, point2){
 		var xs = 0;
 		var ys = 0;
@@ -66,26 +80,26 @@ function qrSignature(){
 			//Right
 			rotationDir = 1;
 		}
+		/*Get the alpha*/
 		rotationDegree = Math.asin(sideA/sideC) * 180/Math.PI;
-		
 		/*Let's draw the rotated frame*/
-		context.save();
-		context.translate(canvas.width/2,canvas.height/2);
-		context.rotate(rotationDir*rotationDegree*Math.PI/180);
-		context.drawImage(canvas,-canvas.width/2,-canvas.height/2);
-		context.restore();
+		operationContext.clearRect(0, 0, canvWidth, canvHeight);
+		operationContext.save();
+		operationContext.translate(canvas.width/2,canvas.height/2);
+		operationContext.rotate(rotationDir*rotationDegree*Math.PI/180);
+		operationContext.drawImage(canvas,-canvas.width/2,-canvas.height/2);
+		operationContext.restore();
 	}
 	function checkQr(){
-		//qrcode.patternPos = [];
 		qrcode.callback = function(){
 			if(!qrCodeIsReady) {
 				qrCodeIsReady = true;
-				operationContext.drawImage(canvas, 0, 0);
 				rotateToHorizontal();	
 			}			
 		}
 		try{
-			contrastImage(context,30);
+			imageColorCorrection(context);
+			contrastImage(context,50);
 			qrcode.decode();
 		} catch(e){
 			console.log(e)
@@ -93,6 +107,7 @@ function qrSignature(){
 	}
 	function drawVideo(){
 		if(!qrCodeIsReady){
+			originalContext.drawImage($this, 0, 0);
 			context.drawImage($this, 0, 0);
 			checkQr();
 			setTimeout(function(){ drawVideo(); }, 1000/25); //25 fps
