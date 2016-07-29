@@ -1,8 +1,8 @@
 function qrSignature(){
 	/*Global variables*/
 	var canvas = document.getElementById('qr-canvas');
-	var canvWidth = 1024;
-	var canvHeight = 768;
+	var canvWidth = 640;
+	var canvHeight = 480;
 	var context = canvas.getContext('2d');
 	var operationCanvas = document.getElementById('operation-canvas');
 	var operationContext = operationCanvas.getContext('2d');
@@ -55,32 +55,32 @@ function qrSignature(){
 	function rotateToHorizontal(){
 		var pointA = {};
 		var pointB = {};
-		leftX = qrcode.patternPos[0][1].x;
-		leftY = qrcode.patternPos[0][1].y;
+		var lastPatternIndex = qrcode.patternPos.length-1;
+		leftX = qrcode.patternPos[lastPatternIndex][1].x;
+		leftY = qrcode.patternPos[lastPatternIndex][1].y;
 
-		pointA.x = qrcode.patternPos[0][2].x;
-		pointA.y = qrcode.patternPos[0][1].y;
-		pointB.x = qrcode.patternPos[0][2].x;
-		pointB.y = qrcode.patternPos[0][2].y;
+		pointA.x = qrcode.patternPos[lastPatternIndex][2].x;
+		pointA.y = qrcode.patternPos[lastPatternIndex][1].y;
+		pointB.x = qrcode.patternPos[lastPatternIndex][2].x;
+		pointB.y = qrcode.patternPos[lastPatternIndex][2].y;
 		sideA = lineDistance(pointA,pointB);
 
-		pointA.x = qrcode.patternPos[0][1].x;
-		pointA.y = qrcode.patternPos[0][1].y;
-
-		pointB.x = qrcode.patternPos[0][2].x;
-		pointB.y = qrcode.patternPos[0][1].y;
+		pointA.x = qrcode.patternPos[lastPatternIndex][1].x;
+		pointA.y = qrcode.patternPos[lastPatternIndex][1].y;
+		pointB.x = qrcode.patternPos[lastPatternIndex][2].x;
+		pointB.y = qrcode.patternPos[lastPatternIndex][1].y;
 		sideB = lineDistance(pointA,pointB);
 		/*Good old Pythagorean theorem*/
 		sideC = Math.sqrt(Math.pow(sideA, 2) + Math.pow(sideB, 2));
 
-		if(qrcode.patternPos[0][2].y > qrcode.patternPos[0][1].y) {
+		if(qrcode.patternPos[lastPatternIndex][2].y > qrcode.patternPos[lastPatternIndex][1].y) {
 			//Left
 			rotationDir = -1;
 		} else {
 			//Right
 			rotationDir = 1;
 		}
-		/*Get the alpha*/
+		/*Get the alpha angle*/
 		rotationDegree = Math.asin(sideA/sideC) * 180/Math.PI;
 		/*Let's draw the rotated frame*/
 		operationContext.clearRect(0, 0, canvWidth, canvHeight);
@@ -89,6 +89,61 @@ function qrSignature(){
 		operationContext.rotate(rotationDir*rotationDegree*Math.PI/180);
 		operationContext.drawImage(canvas,-canvas.width/2,-canvas.height/2);
 		operationContext.restore();
+		
+		/*Test draw of triangle*/
+		context.fillStyle = 'yellow';
+		context.fillRect( qrcode.patternPos[lastPatternIndex][1].x, qrcode.patternPos[lastPatternIndex][1].y, 10, 10);
+		/*Test draw end*/
+		/*TestA*/
+		context.beginPath();
+		context.lineWidth = 2;
+		context.strokeStyle = 'yellow';
+		context.moveTo(qrcode.patternPos[lastPatternIndex][1].x,qrcode.patternPos[lastPatternIndex][1].y);
+		context.lineTo(qrcode.patternPos[lastPatternIndex][2].x,qrcode.patternPos[lastPatternIndex][2].y);
+		/*TestAEnd*/
+		/*TestB*/
+		context.lineTo(qrcode.patternPos[lastPatternIndex][2].x,qrcode.patternPos[lastPatternIndex][1].y);
+		/*TestBEnd*/
+		/*TestC*/
+		context.lineTo(qrcode.patternPos[lastPatternIndex][1].x,qrcode.patternPos[lastPatternIndex][1].y);
+		context.stroke();
+		/*TestCEnd*/
+		
+		/*QR code ROTATED left-top marker position*/
+		pointA.x = canvWidth/2;
+		pointA.y = canvHeight/2;
+		pointB.x = qrcode.patternPos[0][1].x;
+		pointB.y = canvHeight/2;
+		sideA = lineDistance(pointA,pointB);
+		
+		pointA.x = pointB.x;
+		pointA.y = pointB.y;
+		pointB.y = leftY;
+		sideB = lineDistance(pointA,pointB);
+		
+		sideC = Math.sqrt(Math.pow(sideA, 2) + Math.pow(sideB, 2)); //circle radius
+		
+		newX = canvWidth/2  + Math.round(Math.cos(rotationDegree*Math.PI/180)) * sideC;
+		if(rotationDir == 1) {
+			newY = canvHeight/2 - Math.round(Math.sin(rotationDegree*Math.PI/180)) * sideC;
+		} else {
+			newY = canvHeight/2 + Math.round(Math.sin(rotationDegree*Math.PI/180)) * sideC;
+		}
+		/*Test draw rotated marker*/
+		operationContext.beginPath();
+		operationContext.strokeStyle = 'red';
+		operationContext.lineWidth = 2;
+		operationContext.moveTo(canvWidth/2,canvHeight/2);
+		operationContext.lineTo(qrcode.patternPos[0][1].x,canvHeight/2);
+		operationContext.lineTo(pointB.x,pointB.y);
+		operationContext.lineTo(canvWidth/2,canvHeight/2);
+		operationContext.stroke();
+		operationContext.beginPath();
+		operationContext.arc(canvWidth/2,canvHeight/2,sideC,0,2*Math.PI);
+		operationContext.stroke();
+		operationContext.fillStyle = 'blue';
+		operationContext.fillRect( newX, newY, 10, 10);
+		/*Test draw rotated marker end*/
 	}
 	function checkQr(){
 		qrcode.callback = function(){
@@ -99,7 +154,7 @@ function qrSignature(){
 		}
 		try{
 			imageColorCorrection(context);
-			contrastImage(context,50);
+			contrastImage(context,70);
 			qrcode.decode();
 		} catch(e){
 			console.log(e)
