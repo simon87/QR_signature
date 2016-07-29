@@ -51,6 +51,136 @@ function qrSignature(){
 		ys = ys * ys;
 		return Math.sqrt( xs + ys );
 	}
+	function cutSignature(){
+		contrastImage(operationContext,80);
+		//Y begin
+		origiLeftY = leftY;
+		for(i=0;i<4;i++){
+			pixColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
+			newColor = pixColor;
+			while(Math.abs(pixColor - newColor) < 120) {
+				leftY = leftY-1;
+				newColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
+			}
+		}
+		leftY = leftY+1;
+		operationContext.fillStyle = "blue";
+		operationContext.fillRect( leftX, leftY, 10, 10);
+		return false;
+		//X begin
+		for(i=0;i<3;i++){
+			pixColor = operationContext.getImageData(leftX, origiLeftY, 1, 1).data[0];
+			newColor = pixColor;
+			while(Math.abs(pixColor - newColor) < 100) {
+				leftX = leftX-1;
+				newColor = operationContext.getImageData(leftX, origiLeftY, 1, 1).data[0];
+			}
+		}
+		
+		origiLeftX = leftX;
+		operationContext.fillRect( leftX, leftY, 10, 10);
+		return false;
+		//Right edge
+		pixColor = operationContext.getImageData(leftX, leftY, 5, 5).data[0];
+		newColor = pixColor;
+		run = 0;
+		while(Math.abs(pixColor - newColor) < 150 || run == 100) {
+			run++;
+			//Hogy nem csak a kép torzít-e
+			checkBottomColor = operationContext.getImageData(leftX, leftY+1, 1, 1).data[0];
+			checkTopColor = operationContext.getImageData(leftX, leftY-1, 1, 1).data[0];
+			newColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
+			//Ha a két pixellel lejjebb lévő pixel színe 
+			if(checkBottomColor < newColor){
+				leftY += 1;
+			} else if(checkTopColor < newColor) {
+				leftY -= 1;
+			} else {
+				leftX = leftX-1;
+			}
+			//Újradefiniálom a newColor-t
+			newColor = operationContext.getImageData(leftX, leftY, 5, 5).data[0];
+		}
+		//Left edge
+		
+		leftX += 2;
+		operationContext.fillRect( leftX, leftY, 10, 10);
+		
+		//leftY bottom
+		pixColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
+		newColor = pixColor;
+		leftDownY = leftY;
+		
+		while(Math.abs(pixColor - newColor) < 100) {
+			leftDownY+=1;
+			checkRightColor = operationContext.getImageData(leftX+1, leftDownY, 1, 1).data[0];
+			checkLeftColor = operationContext.getImageData(leftX-1, leftDownY, 1, 1).data[0];
+			newColor = operationContext.getImageData(leftX, leftDownY, 1, 1).data[0];
+			if(checkRightColor < newColor){
+				leftX += 1;
+			} else if(checkLeftColor < newColor) {
+				leftX -= 1;
+			}
+			newColor = operationContext.getImageData(leftX, leftDownY, 1, 1).data[0];
+		}
+		
+		leftDownY -= 2;
+		console.log("Alja:"+leftDownY);
+		operationContext.fillRect( leftX, leftDownY, 10, 10);
+		operationContext.lineWidth = 1;
+
+		//Körberajzolás
+		operationContext.beginPath();
+		operationContext.moveTo(origiLeftX,leftY);
+		operationContext.lineTo(leftX,leftY);
+		operationContext.lineTo(leftX,leftDownY);
+		operationContext.lineTo(origiLeftX,leftDownY);
+		operationContext.lineTo(origiLeftX,leftY);
+		operationContext.strokeStyle="red";
+		operationContext.stroke();
+		var sourceX = leftX;
+        var sourceY = leftY;
+        var sourceWidth = origiLeftX-leftX;
+        var sourceHeight = leftDownY-leftY;
+        var destWidth = origiLeftX-leftX;
+        var destHeight = leftDownY-leftY;
+        var destX = leftX;
+        var destY = leftY;
+
+		console.log("destx:"+destHeight);
+		return false;
+		//context.clearRect(0, 0, canvas.width, canvas.height);
+		operationContext.clearRect(0,0,operationCanvas.width,operationCanvas.height);
+		/*context2.save();
+		context2.translate(canvas.width/2,canvas.height/2);
+		context2.rotate(-1*degree*Math.PI/180);
+		context2.drawImage(imageObj,-imageObj.width/2,-imageObj.height/2);
+		context2.restore();*/
+        //operationContext.drawImage(canvas, sourceX+5, sourceY+5, sourceWidth-10, sourceHeight-15, 0, 0, destWidth-10, destHeight-15);
+        operationContext.drawImage(canvas, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, destWidth, destHeight);
+		
+		/*var canvas_img = document.createElement('canvas');
+
+		canvas_img.id = "CursorLayer";
+		canvas_img.width = 1024;
+		canvas_img.height = 480;
+		canvas_img.style.zIndex = 8;
+		//canvas_img.style.position = "absolute";
+		var body = document.getElementsByTagName("body")[0];
+		body.appendChild(canvas_img);
+		canvas_img = document.getElementById("CursorLayer");
+		canvas_img.drawImage(canvas, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight);
+		cursorLayer = document.getElementById("CursorLayer");*/
+		//context2.rotate(-1*degree*Math.PI/180);
+		removeColor();
+		imageColorCorrection(operationContext);
+		//removeBorders();
+		//document.getElementById("qr-canvas").style.display = "none";
+		/*var img    = canvas2.toDataURL("image/png");
+		var image = new Image();
+		image.src = img;
+		document.body.appendChild(image);*/
+	}
 	/*Rotate to horizontal by the two top markers*/
 	function rotateToHorizontal(){
 		var pointA = {};
@@ -90,24 +220,9 @@ function qrSignature(){
 		operationContext.drawImage(canvas,-canvas.width/2,-canvas.height/2);
 		operationContext.restore();
 		
-		/*Test draw of triangle*/
-		context.fillStyle = 'yellow';
-		context.fillRect( qrcode.patternPos[lastPatternIndex][1].x, qrcode.patternPos[lastPatternIndex][1].y, 10, 10);
-		/*Test draw end*/
-		/*TestA*/
-		context.beginPath();
-		context.lineWidth = 2;
-		context.strokeStyle = 'yellow';
-		context.moveTo(qrcode.patternPos[lastPatternIndex][1].x,qrcode.patternPos[lastPatternIndex][1].y);
-		context.lineTo(qrcode.patternPos[lastPatternIndex][2].x,qrcode.patternPos[lastPatternIndex][2].y);
-		/*TestAEnd*/
-		/*TestB*/
-		context.lineTo(qrcode.patternPos[lastPatternIndex][2].x,qrcode.patternPos[lastPatternIndex][1].y);
-		/*TestBEnd*/
-		/*TestC*/
-		context.lineTo(qrcode.patternPos[lastPatternIndex][1].x,qrcode.patternPos[lastPatternIndex][1].y);
-		context.stroke();
-		/*TestCEnd*/
+		/*creating the "blue"*/
+		context.fillStyle = 'blue';
+		context.fillRect( qrcode.patternPos[lastPatternIndex][1].x, qrcode.patternPos[lastPatternIndex][1].y, 2, 2);
 		
 		/*QR code ROTATED left-top marker position*/
 		pointA.x = canvWidth/2;
@@ -129,21 +244,16 @@ function qrSignature(){
 		} else {
 			newY = canvHeight/2 + Math.round(Math.sin(rotationDegree*Math.PI/180)) * sideC;
 		}
-		/*Test draw rotated marker*/
-		operationContext.beginPath();
-		operationContext.strokeStyle = 'red';
-		operationContext.lineWidth = 2;
-		operationContext.moveTo(canvWidth/2,canvHeight/2);
-		operationContext.lineTo(qrcode.patternPos[0][1].x,canvHeight/2);
-		operationContext.lineTo(pointB.x,pointB.y);
-		operationContext.lineTo(canvWidth/2,canvHeight/2);
-		operationContext.stroke();
-		operationContext.beginPath();
-		operationContext.arc(canvWidth/2,canvHeight/2,sideC,0,2*Math.PI);
-		operationContext.stroke();
-		operationContext.fillStyle = 'blue';
-		operationContext.fillRect( newX, newY, 10, 10);
-		/*Test draw rotated marker end*/
+		/*Get the new position of the "blue"*/
+		canvasData = context.getImageData(0, 0, canvWidth, canvHeight),
+        pix = canvasData.data;
+		for (var i = 0, n = pix.length; i <n; i += 4) {
+			if(pix[i] < 50 && pix[i+1] < 50 && pix[i+2] > 200){
+				leftX = (i / 4) % canvWidth;
+				LeftY = Math.floor((i / 4) / canvWidth);
+			}
+		}
+		cutSignature();
 	}
 	function checkQr(){
 		qrcode.callback = function(){
@@ -154,7 +264,7 @@ function qrSignature(){
 		}
 		try{
 			imageColorCorrection(context);
-			contrastImage(context,70);
+			contrastImage(context,50);
 			qrcode.decode();
 		} catch(e){
 			console.log(e)
