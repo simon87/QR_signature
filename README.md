@@ -1,7 +1,5 @@
 # Recognize the QR and crop the signature
-From
 ![alt tag](https://github.com/simon87/QR_signature/blob/master/src/test_images/from.jpg?raw=true)
-To
 ![alt tag](https://github.com/simon87/QR_signature/blob/master/src/test_images/to_this.jpg?raw=true)
 # QR_signature
 After QR code recognize, and rotate to horizontal
