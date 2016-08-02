@@ -104,6 +104,7 @@ function qrSignature(){
         finalContext.drawImage(originalCanvas, sourceX, sourceY, sourceWidth-8, sourceHeight-8, -4, -4, sourceWidth-8, sourceHeight-8);
         contrastImage(finalContext,20);
 		imageColorCorrection(finalContext);
+		finalImageBase64 = finalCanvas.toDataURL("image/png");
 	}
 	function getTheLeftBorder(leftX,leftY) {
 		returnObj = {};
@@ -208,12 +209,12 @@ function qrSignature(){
 			pixColor = operationContext.getImageData(leftX, origiLeftY, 1, 1).data[0];
 			newColor = pixColor;
 			if(i%2 == 0){
-				while(newColor < 50) {
+				while(newColor < 50 && leftX > 1) {
 					leftX = leftX-1;
 					newColor = operationContext.getImageData(leftX, origiLeftY, 1, 1).data[0];
 				}
 			} else {
-				while(newColor > 50) {
+				while(newColor > 50 && leftX > 1) {
 					leftX = leftX-1;
 					newColor = operationContext.getImageData(leftX, origiLeftY, 1, 1).data[0];
 				}
@@ -295,11 +296,11 @@ function qrSignature(){
 		operationContext.drawImage(canvas,-canvas.width/2,-canvas.height/2);
 		operationContext.restore();
 		/*Rotate and save the original image for the final operations*/
-		/*originalContext.save();
+		originalContext.save();
 		originalContext.translate(canvas.width/2,canvas.height/2);
 		originalContext.rotate(rotationDir*rotationDegree*Math.PI/180);
 		originalContext.drawImage(originalCanvas,-canvas.width/2,-canvas.height/2);
-		originalContext.restore();*/
+		originalContext.restore();
 		
 		/*creating the "blue"*/
 		context.fillStyle = 'blue';
