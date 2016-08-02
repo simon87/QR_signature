@@ -82,15 +82,15 @@ function qrSignature(){
 		key = content.split(";")[1];
 		document.getElementById('qr-content').innerHTML = '<b>URL:</b>'+url+'<br /><b>Key:</b>'+key;
 	}
-	function createFinalImage(){
-		var sourceX = leftX;
-        var sourceY = leftY;
-        var sourceWidth = origiLeftX-leftX;
-        var sourceHeight = leftDownY-leftY;
-        var destWidth = origiLeftX-leftX;
-        var destHeight = leftDownY-leftY;
-        var destX = leftX;
-        var destY = leftY;
+	function createFinalImage(leftSide){
+		var sourceX = leftSide.x;
+        var sourceY = leftSide.y;
+        var sourceWidth = origiLeftX-leftSide.x;
+        var sourceHeight = leftDownY-leftSide.y;
+        var destWidth = origiLeftX-leftSide.x;
+        var destHeight = leftDownY-leftSide.y;
+        var destX = leftSide.x;
+        var destY = leftSide.y;
 
         var finalCanvas = document.createElement('canvas');
         finalCanvas.id = "final-canvas";
@@ -102,14 +102,14 @@ function qrSignature(){
         body.appendChild(finalCanvas);
 
         finalContext.drawImage(originalCanvas, sourceX, sourceY, sourceWidth-8, sourceHeight-8, -4, -4, sourceWidth-8, sourceHeight-8);
-        contrastImage(finalContext,100);
+        contrastImage(finalContext,20);
 		imageColorCorrection(finalContext);
 	}
 	function getTheLeftBorder(leftX,leftY) {
 		returnObj = {};
 		pixColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
 		newColor = pixColor;
-		while(newColor < 200 && leftX > 1) {
+		while(newColor < 100 && leftX > 1) {
 			leftX = leftX-1;
 			//Redefine the newColor
 			newColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
@@ -118,10 +118,10 @@ function qrSignature(){
 			checkTopColor = operationContext.getImageData(leftX, leftY-1, 1, 1).data[0];
 			newColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
 			//The color of the lower-upper pixels
-			if(checkBottomColor < 200 && checkBottomColor < newColor){
+			if(checkBottomColor < 100 && checkBottomColor < newColor){
 				leftY = leftY+1;
 				newColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
-			} else if (checkTopColor < 200 && checkTopColor < newColor) {
+			} else if (checkTopColor < 100 && checkTopColor < newColor) {
 				leftY = leftY-1;
 				newColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
 			}
@@ -137,17 +137,18 @@ function qrSignature(){
 	function getTheBottomBorder(leftSideX,leftDownY,newBottomColor){
 		returnObj = {};
 		pixColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
+		//operationContext.fillRect(leftSideX,leftDownY,10,10);
 		newBottomColor = pixColor;
-		while(newBottomColor < 200 && leftDownY < canvHeight) {
+		while(newBottomColor < 100 && leftDownY < canvHeight) {
 			leftDownY+=1;
 			newBottomColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
 			checkRightColor = operationContext.getImageData(leftSideX+1, leftDownY, 1, 1).data[0];
 			checkLeftColor = operationContext.getImageData(leftSideX-1, leftDownY, 1, 1).data[0];
 			newBottomColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
-			if(checkRightColor < newBottomColor && checkRightColor < 200 && leftDownY<canvHeight){
+			if(checkRightColor < newBottomColor && checkRightColor < 100 && leftDownY<canvHeight){
 				leftSideX = leftSideX+1;
 				newBottomColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
-			} else if (checkLeftColor < newBottomColor && checkLeftColor < 200 && leftDownY<canvHeight) {
+			} else if (checkLeftColor < newBottomColor && checkLeftColor < 100 && leftDownY<canvHeight) {
 				leftSideX = leftSideX-1;
 				newBottomColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
 			}
@@ -156,6 +157,7 @@ function qrSignature(){
 		returnObj.x = leftSideX;
 		returnObj.y = leftDownY;
 		operationContext.fillStyle='yellow';
+
 		//operationContext.fillRect(leftSideX,leftDownY,10,10);
 		return returnObj;
 	}
@@ -220,12 +222,15 @@ function qrSignature(){
 		leftY = leftY-1;
 		origiLeftX = leftX;
 		leftSide = getTheLeftBorder(leftX,leftY);
-		
+		leftX = leftSide.x;
+		leftY = leftSide.y;
+		//operationContext.fillRect(leftX,leftY,10,10);
+		//return false;
 	//	leftSide = leftX;
 
 		bottomPos = getTheBottomBorder(leftSide.x,leftSide.y,leftSide.newColor);
 		operationContext.fillRect(bottomPos.x,bottomPos.y,10,10);
-		return false;
+		//return false;
 		leftX = bottomPos.x;
 		leftDownY = bottomPos.y;
 		/*if(leftY+150 > leftDownY) {
@@ -239,14 +244,14 @@ function qrSignature(){
 		operationContext.strokeStyle = 'red';
 		operationContext.beginPath();
 		operationContext.moveTo(origiLeftX,leftY);
-		operationContext.lineTo(leftSide,leftY);
+		operationContext.lineTo(leftSide.x,leftY);
 		operationContext.lineTo(leftX,leftDownY);
 		operationContext.lineTo(origiLeftX,leftDownY);
 		operationContext.lineTo(origiLeftX,leftY);
 		operationContext.strokeStyle="red";
 		operationContext.stroke();
 		
-		createFinalImage();
+		createFinalImage(leftSide);
 		return false;
 		removeColor();
 		imageColorCorrection(operationContext);
@@ -290,11 +295,11 @@ function qrSignature(){
 		operationContext.drawImage(canvas,-canvas.width/2,-canvas.height/2);
 		operationContext.restore();
 		/*Rotate and save the original image for the final operations*/
-		originalContext.save();
+		/*originalContext.save();
 		originalContext.translate(canvas.width/2,canvas.height/2);
 		originalContext.rotate(rotationDir*rotationDegree*Math.PI/180);
 		originalContext.drawImage(originalCanvas,-canvas.width/2,-canvas.height/2);
-		originalContext.restore();
+		originalContext.restore();*/
 		
 		/*creating the "blue"*/
 		context.fillStyle = 'blue';
@@ -340,6 +345,7 @@ function qrSignature(){
 		//operationContext.fillRect(newleftX,newleftY,10,10);
 		operationContext.fillStyle = 'blue';
 		contrastImage(context,100);
+		
 		cutSignature(newleftX,newleftY);
 	}
 	function checkQr(){
@@ -347,14 +353,14 @@ function qrSignature(){
 			if(!qrCodeIsReady) {
 				getQRContent();
 				qrCodeIsReady = true;
-				imageColorCorrection(context); //TEszt
+				imageColorCorrection(context); //Test
 				//document.getElementById('original-canvas').style.display = 'none';
 				rotateToHorizontal();	
 			}			
 		}
 		try{
-			imageColorCorrection(context);
-			//contrastImage(context,50);
+			//imageColorCorrection(context);
+			contrastImage(context,50);
 			qrcode.decode();
 		} catch(e){
 			console.log(e)
@@ -405,8 +411,15 @@ function qrSignature(){
 			}
 		}, 0);
 	}
+	/*imageObj = new Image();
+	imageObj.src = 'src/test_images/from.jpg';
+	imageObj.onload = function(){
+		originalContext.drawImage(imageObj, 0, 0);
+		context.drawImage(imageObj, 0, 0);
+		checkQr();
+	}*/
 	checkUserMedia();
-	/*******TESZT*********/
+	/*******TEST*********/
 	  function findPos(obj) {
 	  var curleft = 0, curtop = 0;
 	  if (obj.offsetParent) {
@@ -436,5 +449,5 @@ function qrSignature(){
 		//$('#status').html(coord + "<br>" + hex);
 		document.getElementById('status').innerHTML = coord + "<br>" + hex + "<br />" + p[0]+","+ p[1]+","+ p[2];
 	});
-	/*TESZT END*/
+	/*TEST END*/
 }
