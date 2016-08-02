@@ -411,6 +411,7 @@ function qrSignature(){
 			}
 		}, 0);
 	}
+	
 	/*imageObj = new Image();
 	imageObj.src = 'src/test_images/from.jpg';
 	imageObj.onload = function(){
