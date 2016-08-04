@@ -74,6 +74,11 @@ function AlignmentPatternFinder( image,  startX,  startY,  width,  height,  modu
 	this.crossCheckStateCount = new Array(0,0,0);
 	this.resultPointCallback = resultPointCallback;
 	
+	canvas = document.getElementById('qr-canvas');
+	context = canvas.getContext('2d');
+	context.fillStyle = 'yellow';
+	context.fillRect(startX,startY,10,10);
+	
 	this.centerFromEnd=function(stateCount,  end)
 		{
 			return  (end - stateCount[2]) - stateCount[1] / 2.0;

@@ -102,8 +102,8 @@ function qrSignature(){
         body.appendChild(finalCanvas);
 
         finalContext.drawImage(originalCanvas, sourceX, sourceY, sourceWidth-8, sourceHeight-8, -4, -4, sourceWidth-8, sourceHeight-8);
-        contrastImage(finalContext,20);
-		imageColorCorrection(finalContext);
+       // contrastImage(finalContext,20);
+		//imageColorCorrection(finalContext);
 		finalImageBase64 = finalCanvas.toDataURL("image/png");
 	}
 	function getTheLeftBorder(leftX,leftY) {
@@ -135,9 +135,51 @@ function qrSignature(){
 		return returnObj;
 		//operationContext.fillRect(leftX,leftY,10,10);
 	}
+	function getTheTopBorder(leftTopX,leftTopY,maxDifference){
+		for(i=0;i<4;i++){
+			pixColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
+			newColor = pixColor;
+			/*Find white*/
+			if(i%2 == 0) {
+				while(newColor < 10 && leftTopY > 1) {
+					leftTopY = leftTopY-1;
+					/*Check the right and left pixels color (if the top black line is damaged, or not well-photographed it's help)*/
+					leftPixelColor = operationContext.getImageData(leftTopX-1, leftTopY, 1, 1).data[0];
+					rightPixelColor = operationContext.getImageData(leftTopX+1, leftTopY, 1, 1).data[0];
+					if(Math.abs(pixColor - leftPixelColor) < maxDifference && Math.abs(pixColor - newColor) > maxDifference) {
+						newColor = leftPixelColor;
+					} else if(Math.abs(pixColor - rightPixelColor) < maxDifference && Math.abs(pixColor - newColor) > maxDifference) {
+						newColor = rightPixelColor;
+					} else {
+						newColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
+					}
+				}
+			} else {
+				while(newColor > 10 && leftTopY > 1) {
+					leftTopY = leftTopY-1;
+					/*Check the right and left pixels color (if the top black line is damaged, or not well-photographed it's help)*/
+					leftPixelColor = operationContext.getImageData(leftTopX-1, leftTopY, 1, 1).data[0];
+					rightPixelColor = operationContext.getImageData(leftTopX+1, leftTopY, 1, 1).data[0];
+					if(Math.abs(pixColor - leftPixelColor) < maxDifference && Math.abs(pixColor - newColor) > maxDifference) {
+						newColor = leftPixelColor;
+					} else if(Math.abs(pixColor - rightPixelColor) < maxDifference && Math.abs(pixColor - newColor) > maxDifference) {
+						newColor = rightPixelColor;
+					} else {
+						newColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
+					}
+				}
+			}
+		}
+		returnObj = {};
+		returnObj.x = leftTopX;
+		returnObj.y = leftTopY;
+		returnObj.newColor = newColor;
+		return returnObj;
+	}
 	function getTheBottomBorder(leftSideX,leftDownY,newBottomColor){
 		returnObj = {};
 		pixColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
+		
 		//operationContext.fillRect(leftSideX,leftDownY,10,10);
 		newBottomColor = pixColor;
 		while(newBottomColor < 100 && leftDownY < canvHeight) {
@@ -166,43 +208,16 @@ function qrSignature(){
 		contrastImage(operationContext,100);
 		imageColorCorrection(operationContext);
 		maxDifference = 120;
-		//Y begin
 		origiLeftY = leftY;
+		topBorder = getTheTopBorder(leftX,leftY,maxDifference);
+		
+		//Y begin
+		
+		leftX = topBorder.x;
+		leftY = topBorder.y;
+		newColor = topBorder.newColor;
 		//operationContext.fillRect(leftX,leftY,10,10);
-		for(i=0;i<4;i++){
-			pixColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
-			newColor = pixColor;
-			/*Find white*/
-			if(i%2 == 0) {
-				while(newColor < 10 && leftY > 1) {
-					leftY = leftY-1;
-					/*Check the right and left pixels color (if the top black line is damaged, or not well-photographed it's help)*/
-					leftPixelColor = operationContext.getImageData(leftX-1, leftY, 1, 1).data[0];
-					rightPixelColor = operationContext.getImageData(leftX+1, leftY, 1, 1).data[0];
-					if(Math.abs(pixColor - leftPixelColor) < maxDifference && Math.abs(pixColor - newColor) > maxDifference) {
-						newColor = leftPixelColor;
-					} else if(Math.abs(pixColor - rightPixelColor) < maxDifference && Math.abs(pixColor - newColor) > maxDifference) {
-						newColor = rightPixelColor;
-					} else {
-						newColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
-					}
-				}
-			} else {
-				while(newColor > 10 && leftY > 1) {
-					leftY = leftY-1;
-					/*Check the right and left pixels color (if the top black line is damaged, or not well-photographed it's help)*/
-					leftPixelColor = operationContext.getImageData(leftX-1, leftY, 1, 1).data[0];
-					rightPixelColor = operationContext.getImageData(leftX+1, leftY, 1, 1).data[0];
-					if(Math.abs(pixColor - leftPixelColor) < maxDifference && Math.abs(pixColor - newColor) > maxDifference) {
-						newColor = leftPixelColor;
-					} else if(Math.abs(pixColor - rightPixelColor) < maxDifference && Math.abs(pixColor - newColor) > maxDifference) {
-						newColor = rightPixelColor;
-					} else {
-						newColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
-					}
-				}
-			}
-		}
+		
 		
 		//X begin
 		for(i=0;i<3;i++){
@@ -368,6 +383,13 @@ function qrSignature(){
 		}
 	}
 	function drawVideo(){
+		$("#rectangle").css({
+			'width':(video.videoWidth-50)+"px",
+			'height':(video.videoWidth-50)/4.04+"px",
+			'margin-left':'25px',
+			'margin-top':(video.videoHeight-(video.videoWidth-50)/4.04)/2+'px',
+			'display':'block'
+		});
 		if(!qrCodeIsReady){
 			originalContext.drawImage($this, 0, 0);
 			context.drawImage($this, 0, 0);
@@ -377,6 +399,7 @@ function qrSignature(){
 	}
 	function videoIsActive() {
 		while(context.getImageData(1, 1, 1, 1).data[0] == 0 && context.getImageData(1, 1, 1, 1).data[1] == 0 && context.getImageData(1, 1, 1, 1).data[2] == 0 && context.getImageData(1, 1, 1, 1).data[3] == 0){
+			//Draw the rect
 			return true;
 		}
 	}

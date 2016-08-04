@@ -1,3 +1,10 @@
 canvas {
 	float:left;
 }
+#rectangle {
+	position:absolute;
+	display:none;
+	left:0;
+	top:0;
+	border:5px solid rgba(112, 202, 15, 0.5);
+}
