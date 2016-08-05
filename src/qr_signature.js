@@ -1,3 +1,7 @@
+var findQrBool = false;
+function findQr(){
+	findQrBool = true;
+}
 function qrSignature(){
 	/*Global variables*/
 	var canvas = document.getElementById('qr-canvas');
@@ -74,6 +78,11 @@ function qrSignature(){
 			}
 		}
 		finalContext.putImageData(canvasData, 0, 0);
+	}
+	function pixelTolarence(coord,direction,tolarence){
+		if(direction == 'left') {
+			
+		}
 	}
 	function getQRContent(){
 		document.getElementById('qr-content').innerHTML = qrcode.result;
@@ -170,6 +179,28 @@ function qrSignature(){
 				}
 			}
 		}
+		returnObj = {}
+		returnObj.x = leftTopX;
+		returnObj.y = leftTopY;
+		returnObj.newColor = newColor;
+		return returnObj;
+	}
+	function getTheRightBorder(leftTopX,leftTopY,maxDifference){
+		for(i=0;i<3;i++){
+			pixColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
+			newColor = pixColor;
+			if(i%2 == 0){
+				while(newColor < 50 && leftTopX > 1) {
+					leftTopX = leftTopX-1;
+					newColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
+				}
+			} else {
+				while(newColor > 50 && leftTopX > 1) {
+					leftTopX = leftTopX-1;
+					newColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
+				}
+			}
+		}
 		returnObj = {};
 		returnObj.x = leftTopX;
 		returnObj.y = leftTopY;
@@ -179,8 +210,6 @@ function qrSignature(){
 	function getTheBottomBorder(leftSideX,leftDownY,newBottomColor){
 		returnObj = {};
 		pixColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
-		
-		//operationContext.fillRect(leftSideX,leftDownY,10,10);
 		newBottomColor = pixColor;
 		while(newBottomColor < 100 && leftDownY < canvHeight) {
 			leftDownY+=1;
@@ -199,50 +228,28 @@ function qrSignature(){
 		leftDownY -= 2;
 		returnObj.x = leftSideX;
 		returnObj.y = leftDownY;
-		operationContext.fillStyle='yellow';
-
-		//operationContext.fillRect(leftSideX,leftDownY,10,10);
 		return returnObj;
 	}
 	function cutSignature(leftX,leftY){
+		
 		contrastImage(operationContext,100);
 		imageColorCorrection(operationContext);
 		maxDifference = 120;
-		origiLeftY = leftY;
 		topBorder = getTheTopBorder(leftX,leftY,maxDifference);
-		
-		//Y begin
-		
+
+		origiLeftY = leftY;
 		leftX = topBorder.x;
 		leftY = topBorder.y;
 		newColor = topBorder.newColor;
-		//operationContext.fillRect(leftX,leftY,10,10);
-		
-		
-		//X begin
-		for(i=0;i<3;i++){
-			pixColor = operationContext.getImageData(leftX, origiLeftY, 1, 1).data[0];
-			newColor = pixColor;
-			if(i%2 == 0){
-				while(newColor < 50 && leftX > 1) {
-					leftX = leftX-1;
-					newColor = operationContext.getImageData(leftX, origiLeftY, 1, 1).data[0];
-				}
-			} else {
-				while(newColor > 50 && leftX > 1) {
-					leftX = leftX-1;
-					newColor = operationContext.getImageData(leftX, origiLeftY, 1, 1).data[0];
-				}
-			}
-		}
+
+		rightBorder = getTheRightBorder(leftX,origiLeftY,maxDifference);
+		leftX = rightBorder.x;
 		leftY = leftY-1;
 		origiLeftX = leftX;
+
 		leftSide = getTheLeftBorder(leftX,leftY);
 		leftX = leftSide.x;
 		leftY = leftSide.y;
-		//operationContext.fillRect(leftX,leftY,10,10);
-		//return false;
-	//	leftSide = leftX;
 
 		bottomPos = getTheBottomBorder(leftSide.x,leftSide.y,leftSide.newColor);
 		operationContext.fillRect(bottomPos.x,bottomPos.y,10,10);
@@ -268,6 +275,8 @@ function qrSignature(){
 		operationContext.stroke();
 		
 		createFinalImage(leftSide);
+		document.getElementById("qr-canvas").style.display = "none";
+		document.getElementById("rectangle").style.display = "none";
 		return false;
 		removeColor();
 		imageColorCorrection(operationContext);
@@ -383,26 +392,16 @@ function qrSignature(){
 		}
 	}
 	function drawVideo(){
-		$("#rectangle").css({
-			'width':(video.videoWidth-50)+"px",
-			'height':(video.videoWidth-50)/4.04+"px",
-			'margin-left':'25px',
-			'margin-top':(video.videoHeight-(video.videoWidth-50)/4.04)/2+'px',
-			'display':'block'
-		});
 		if(!qrCodeIsReady){
-			originalContext.drawImage($this, 0, 0);
 			context.drawImage($this, 0, 0);
-			checkQr();
+			if(findQrBool) {
+				originalContext.drawImage($this, 0, 0);
+				checkQr();
+			}
 			setTimeout(function(){ drawVideo(); }, 1000/25); //25 fps
 		}
 	}
-	function videoIsActive() {
-		while(context.getImageData(1, 1, 1, 1).data[0] == 0 && context.getImageData(1, 1, 1, 1).data[1] == 0 && context.getImageData(1, 1, 1, 1).data[2] == 0 && context.getImageData(1, 1, 1, 1).data[3] == 0){
-			//Draw the rect
-			return true;
-		}
-	}
+
 	function checkUserMedia() {
 		navigator.getUserMedia = (navigator.getUserMedia || 
 								 navigator.webkitGetUserMedia || 
@@ -428,11 +427,20 @@ function qrSignature(){
 		} else {
 			alert('Sorry, the browser you are using doesn\'t support getUserMedia');
 		}
-		video.addEventListener('play', function() {
+		video.addEventListener('playing', function() {
 			$this = this;
-			if(videoIsActive()) {
-				drawVideo();
-			}
+			$("#rectangle").css({
+				'width':(video.videoWidth-50)+"px",
+				'height':(video.videoWidth-50)/4.04+"px",
+				'margin-left':'25px',
+				'margin-top':(video.videoHeight-(video.videoWidth-50)/4.04)/2+'px',
+				'display':'block'
+			});
+			$("#find_qr_btn").css({
+				"right":"0px",
+				"top":video.videoHeight/2-50
+			});
+			drawVideo();
 		}, 0);
 	}
 	
@@ -443,6 +451,32 @@ function qrSignature(){
 		context.drawImage(imageObj, 0, 0);
 		checkQr();
 	}*/
+
+    // resize the canvas to fill browser window dynamically
+    window.addEventListener('resize', resizeCanvas, false);
+
+    function resizeCanvas() {
+            /*canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+			originalCanvas.width = window.innerWidth;
+            originalCanvas.height = window.innerHeight;
+			operationCanvas.width = window.innerWidth;
+			operationCanvas.height = window.innerHeight;*/
+
+			$("#rectangle").css({
+				'width':(video.videoWidth-50)+"px",
+				'height':(video.videoWidth-50)/4.04+"px",
+				'margin-left':'25px',
+				'margin-top':(video.videoHeight-(video.videoWidth-50)/4.04)/2+'px',
+				'display':'block'
+			});
+			$("#find_qr_btn").css({
+				"right":"0px",
+				"top":video.videoHeight/2-50
+			});
+            //drawStuff(); 
+    }
+    //resizeCanvas();
 	checkUserMedia();
 	/*******TEST*********/
 	  function findPos(obj) {
@@ -472,7 +506,7 @@ function qrSignature(){
 		var p = c.getImageData(x, y, 1, 1).data; 
 		var hex = "#" + ("000000" + rgbToHex(p[0], p[1], p[2])).slice(-6);
 		//$('#status').html(coord + "<br>" + hex);
-		document.getElementById('status').innerHTML = coord + "<br>" + hex + "<br />" + p[0]+","+ p[1]+","+ p[2];
+		//document.getElementById('status').innerHTML = coord + "<br>" + hex + "<br />" + p[0]+","+ p[1]+","+ p[2];
 	});
 	/*TEST END*/
 }
