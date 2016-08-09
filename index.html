@@ -24,16 +24,79 @@
 	</head>
 	<body>
 	<!-- This is a test test file, while the developing is in progress -->
+	<div id='status' style='position:fixed;top:0;left:0;font-family:Verdana;text-align:center;'></div>
+	<div id="sk-folding-cube-container" class="sk-folding-cube">
+		<div class="sk-cube1 sk-cube"></div>
+		<div class="sk-cube2 sk-cube"></div>
+		<div class="sk-cube4 sk-cube"></div>
+		<div class="sk-cube3 sk-cube"></div>
+	</div>
 	<video style="display:none;" id='video'></video>
-	<canvas id='original-canvas' style="display:none;" width='640' height='480'></canvas>
+	<canvas id='original-canvas' style="display:none;"></canvas>
 	<div id='rectangle'></div>
-	<canvas id='qr-canvas' width='640' height='480' ></canvas>
-	<canvas id='operation-canvas' width='640' style="display:none" height='480' ></canvas>
-	<div id='status' style='position:fixed;background-color:#FFFFFF;top:0;right:0;'></div>
+	<canvas id='qr-canvas'></canvas>
+	<canvas id='operation-canvas' style="display:none;"></canvas>
 	<div id='qr-content'></div>
+	
+	<div id="file_button" class="file_button_container"><input type="file" id="input" name="input" accept="image/*" capture="camera"></input></div>
 	<script>
-		test = new qrSignature();
+		/*IPHONE test*/
+		window.onload = function() {
+			input = document.getElementById("input");
+			input.addEventListener("change", handleFile);
+			input_btn = document.getElementById("input");
+			input_btn.style.height = window.innerHeight-window.innerHeight/2+"px";
+			input_btn.style.width = window.innerHeight-window.innerHeight/2+"px";
+			input_btn.style.backgroundSize = "\""+(window.innerHeight-window.innerHeight/2)+"px\"";
+			btn_container = document.getElementById("file_button");
+			btn_container.style.top = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
+			btn_container.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";
+			btn_container.style.backgroundSize = (window.innerHeight-window.innerHeight/2)+"px";
+			input_btn.style.display = "block";
+			loaderContainer = document.getElementById("sk-folding-cube-container");
+			loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
+			loaderContainer.style.height = (window.innerHeight-window.innerHeight/2)+"px";
+			loaderContainer.style.top = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
+			loaderContainer.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";
+		}
+		function handleFile(e) {
+			document.getElementById("file_button").style.display = 'none';
+			document.getElementById("sk-folding-cube-container").style.display = 'block';
+			setTimeout(function(){loadFile(e); }, 500);
+		}
+		function loadFile(e){
+			document.getElementById('status').innerHTML = 'Image loading...';
+			var canvas = document.getElementById('qr-canvas');
+			var context = canvas.getContext("2d");
+			var reader = new FileReader;
+			document.getElementById("file_button").style.display = 'none';
+			document.getElementById("sk-folding-cube-container").style.display = 'block';
+			reader.onload = function(event) {
+				var img = new Image();
+				img.src = reader.result;
+				img.onload = function () {
+					document.getElementById('status').innerHTML = 'Image loaded!';
+					var originalCanvas = document.getElementById('original-canvas'); //For test only
+					var originalContext = originalCanvas.getContext('2d');
+					var operationCanvas = document.getElementById('operation-canvas');
+					var operationContext = operationCanvas.getContext('2d');
+					canvas.width = img.width/5;
+					canvas.height = img.height/5;
+					originalCanvas.width = img.width;
+					originalCanvas.height = img.height;
+					operationCanvas.width = img.width/5;
+					operationCanvas.height = img.height/5;
+					originalContext.drawImage(img, 0, 0);
+					context.drawImage(img, 0, 0,img.width/5,img.height/5);
+					operationContext.drawImage(img, 0, 0,img.width/5,img.height/5);
+					document.getElementById("input").style.display = "none";
+					test = new qrSignature(img.width,img.height);
+					
+				}
+			}
+			reader.readAsDataURL(e.target.files[0]);
+		}
 	</script>
-	<a href="javascript:void(0);" onclick='findQr();' id="find_qr_btn" class="round-button">Scan</a>
+	<a href="javascript:void(0);" onclick='findQr();' id="find_qr_btn" class="round-button" style="display:none;">Scan</a>
 	</body>
 </html> 

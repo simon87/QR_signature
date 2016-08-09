@@ -2,11 +2,11 @@ var findQrBool = false;
 function findQr(){
 	findQrBool = true;
 }
-function qrSignature(){
+function qrSignature(width,height){
 	/*Global variables*/
 	var canvas = document.getElementById('qr-canvas');
-	var canvWidth = 640;
-	var canvHeight = 480;
+	var canvWidth = width;
+	var canvHeight = height;
 	var context = canvas.getContext('2d');
 	var operationCanvas = document.getElementById('operation-canvas');
 	var operationContext = operationCanvas.getContext('2d');
@@ -92,14 +92,14 @@ function qrSignature(){
 		document.getElementById('qr-content').innerHTML = '<b>URL:</b>'+url+'<br /><b>Key:</b>'+key;
 	}
 	function createFinalImage(leftSide){
-		var sourceX = leftSide.x;
-        var sourceY = leftSide.y;
-        var sourceWidth = origiLeftX-leftSide.x;
-        var sourceHeight = leftDownY-leftSide.y;
-        var destWidth = origiLeftX-leftSide.x;
-        var destHeight = leftDownY-leftSide.y;
-        var destX = leftSide.x;
-        var destY = leftSide.y;
+		var sourceX = leftSide.x*5;
+        var sourceY = leftSide.y*5;
+        var sourceWidth = origiLeftX*5-leftSide.x*5;
+        var sourceHeight = leftDownY*5-leftSide.y*5;
+        var destWidth = origiLeftX*5-leftSide.x*5;
+        var destHeight = leftDownY*5-leftSide.y*5;
+        var destX = leftSide.x*5;
+        var destY = leftSide.y*5;
 
         var finalCanvas = document.createElement('canvas');
         finalCanvas.id = "final-canvas";
@@ -114,6 +114,7 @@ function qrSignature(){
        // contrastImage(finalContext,20);
 		//imageColorCorrection(finalContext);
 		finalImageBase64 = finalCanvas.toDataURL("image/png");
+		return finalImageBase64;
 	}
 	function getTheLeftBorder(leftX,leftY) {
 		returnObj = {};
@@ -246,13 +247,15 @@ function qrSignature(){
 		leftX = rightBorder.x;
 		leftY = leftY-1;
 		origiLeftX = leftX;
-
+		/*operationContext.fillStyle = 'yellow';
+		operationContext.fillRect(rightBorder.x,rightBorder.y,10,10);
+		return false;*/
 		leftSide = getTheLeftBorder(leftX,leftY);
 		leftX = leftSide.x;
 		leftY = leftSide.y;
 
 		bottomPos = getTheBottomBorder(leftSide.x,leftSide.y,leftSide.newColor);
-		operationContext.fillRect(bottomPos.x,bottomPos.y,10,10);
+
 		//return false;
 		leftX = bottomPos.x;
 		leftDownY = bottomPos.y;
@@ -273,10 +276,11 @@ function qrSignature(){
 		operationContext.lineTo(origiLeftX,leftY);
 		operationContext.strokeStyle="red";
 		operationContext.stroke();
-		
+		document.getElementById("sk-folding-cube-container").style.display = 'none';
 		createFinalImage(leftSide);
 		document.getElementById("qr-canvas").style.display = "none";
 		document.getElementById("rectangle").style.display = "none";
+		document.getElementById('status').innerHTML = '';
 		return false;
 		removeColor();
 		imageColorCorrection(operationContext);
@@ -370,17 +374,18 @@ function qrSignature(){
 		//operationContext.fillRect(newleftX,newleftY,10,10);
 		operationContext.fillStyle = 'blue';
 		contrastImage(context,100);
-		
 		cutSignature(newleftX,newleftY);
 	}
 	function checkQr(){
 		qrcode.callback = function(){
 			if(!qrCodeIsReady) {
 				getQRContent();
+				document.getElementById('status').style.color = '#5cb85c';
+				document.getElementById('status').innerHTML = 'QR code readed!';
 				qrCodeIsReady = true;
 				imageColorCorrection(context); //Test
 				//document.getElementById('original-canvas').style.display = 'none';
-				rotateToHorizontal();	
+				rotateToHorizontal();
 			}			
 		}
 		try{
@@ -388,7 +393,10 @@ function qrSignature(){
 			contrastImage(context,50);
 			qrcode.decode();
 		} catch(e){
-			console.log(e)
+			document.getElementById('status').style.color = 'red';
+			document.getElementById('status').innerHTML = 'QR code recognize failed, please try again. Error message:'+e;
+			document.getElementById("file_button").style.display = 'block';
+			document.getElementById("sk-folding-cube-container").style.display = 'none';
 		}
 	}
 	function drawVideo(){
@@ -445,16 +453,23 @@ function qrSignature(){
 	}
 	
 	/*imageObj = new Image();
-	imageObj.src = 'src/test_images/from.jpg';
+	imageObj.src = 'src/test_images/from_2.jpg';
 	imageObj.onload = function(){
+		canvas.width = imageObj.width/5;
+		canvas.height = imageObj.height/5;
+		originalCanvas.width = imageObj.width;
+		originalCanvas.height = imageObj.height;
+		operationCanvas.width = imageObj.width/5;
+		operationCanvas.height = imageObj.height/5;
 		originalContext.drawImage(imageObj, 0, 0);
-		context.drawImage(imageObj, 0, 0);
+		context.drawImage(imageObj, 0, 0,imageObj.width/5,imageObj.height/5);
+		operationContext.drawImage(imageObj, 0, 0,imageObj.width/5,imageObj.height/5);
 		checkQr();
 	}*/
 
     // resize the canvas to fill browser window dynamically
-    window.addEventListener('resize', resizeCanvas, false);
-
+    //window.addEventListener('resize', resizeCanvas, false);
+	checkQr();
     function resizeCanvas() {
             /*canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -477,7 +492,7 @@ function qrSignature(){
             //drawStuff(); 
     }
     //resizeCanvas();
-	checkUserMedia();
+	//checkUserMedia();
 	/*******TEST*********/
 	  function findPos(obj) {
 	  var curleft = 0, curtop = 0;
