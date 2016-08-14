@@ -20,6 +20,11 @@
 		<script type="text/javascript" src="src/3rd_party/findpat.js"></script>
 		<script type="text/javascript" src="src/3rd_party/alignpat.js"></script>
 		<script type="text/javascript" src="src/3rd_party/databr.js"></script>
+		
+		<script type="text/javascript" src="src/3rd_party/rijndael/rijndael.js"></script>
+		<script type="text/javascript" src="src/3rd_party/rijndael/mcrypt.js"></script>
+		<script type="text/javascript" src="src/3rd_party/rijndael/core.js"></script>
+		<script type="text/javascript" src="src/3rd_party/rijndael/md5-min.js"></script>
 		<script type="text/javascript" src="src/qr_signature.js"></script>
 		<link rel="manifest" href="src/manifest.json">
 	</head>
@@ -35,30 +40,16 @@
 	<video style="display:none;" id='video'></video>
 	<canvas id='original-canvas'></canvas>
 	<div id='rectangle'></div>
-	<canvas id='qr-canvas'></canvas>
-	<canvas id='operation-canvas' ></canvas>
+	<canvas id='qr-canvas' style="display:none;"></canvas>
+	<canvas id='operation-canvas'style="display:none;" ></canvas>
 	<div id='qr-content'></div>
-	
-	<div id="file_button" class="file_button_container"><input type="file" id="input" name="input" accept="image/*" capture="camera"></input></div>
+	<div id='pin_container' style="display:none;">
+		<input type="password" maxlength="4" id="pin" onkeyup="checkPinPass();" /><br />
+		<button id="send_pin_btn" onclick="sendDocSignature()" disabled>SEND</button>
+	</div>
+	<div id="file_button" class="file_button_container" style="display:none;"><input type="file" id="input" name="input" accept="image/*" capture="camera"></input></div>
 	<script>
 		test = new qrSignature();
-	</script>
-	<script src="src/3rd_party/aes.js"></script>
-	<script src="src/3rd_party/pbkdf2.js"></script>
-	<script>
-	var salt = CryptoJS.lib.WordArray.random(128/8); 
-		var key256Bits500Iterations = CryptoJS.PBKDF2("Secret Passphrase", salt, { keySize: 256/32, iterations: 500 });
-		var iv  = CryptoJS.enc.Hex.parse('101112131415161718191a1b1c1d1e1f');
-
-		var encrypted = CryptoJS.AES.encrypt("Message", key256Bits500Iterations, { iv: iv });  
-		var data_base64 = encrypted.ciphertext.toString(CryptoJS.enc.Base64); 
-		var iv_base64   = encrypted.iv.toString(CryptoJS.enc.Base64);       
-		var key_base64  = encrypted.key.toString(CryptoJS.enc.Base64);
-		console.log(encrypted);
-		console.log("encrypted:"+encrypted);
-		console.log("data_base64:"+data_base64);
-		console.log("iv_base64:"+iv_base64);
-		console.log("key_base64:"+key_base64);
 	</script>
 	<a href="javascript:void(0);" onclick='findQr();' id="find_qr_btn" class="round-button" style="display:none;">Scan</a>
 	</body>

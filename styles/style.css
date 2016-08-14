@@ -133,3 +133,11 @@ canvas {
 	color:#5cb85c;
 	padding-left:8px;
 }
+#pin_container {
+	text-align:center;
+}
+#pin{
+    font-size: 800%;
+    text-align: center;
+    width: 20%;
+}
