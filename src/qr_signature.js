@@ -22,12 +22,12 @@ function qrSignature(){
 	var originalContext = originalCanvas.getContext('2d'); //For test only
 	var localStream;
 	var cameraMode = false;
-
+	var operationContextData;
 	var rotationDegree;
 	var rotationDir;
 	var imgIsReady = false;
 	var qrCodeIsReady = false;
-	
+	var canvasRatio;
 	//var signatureUrl = 'http://dev-api.acrossopeneyes.com/signatures';
 	var signatureUrl = 'http://127.0.0.1/qr_signature_heroku/peaceful-lowlands-44823/web/ajax.php';
 	var unique_identifier = '';
@@ -78,9 +78,10 @@ function qrSignature(){
 		var y = Math.ceil(y);
 		var color = {};
 		var index = (x + y * canvWidth) * 4;
+
 		color.r = imageData[index];
-		color.g = imageData[color.r+1];
-		color.b = imageData[color.r+2];
+		color.g = imageData[index+1];
+		color.b = imageData[index+2];
 		return color;
 	}
 	function removeColor(){
@@ -96,9 +97,24 @@ function qrSignature(){
 		}
 		finalContext.putImageData(canvasData, 0, 0);
 	}
-	function pixelTolarence(coord,direction,tolarence){
+	function pixelTolarence(leftX,leftY,direction){
+		imageData = operationContextData;
 		if(direction == 'left') {
-			
+			leftX = leftX-1;
+			for(i=10;i>0;i--) {
+				if(getImageDataByCords(imageData,leftX-i,leftY).r < 100) {
+					return true;
+				}
+			}
+			return false;
+		} else if(direction == 'bottom') {
+			leftY = leftY+1;
+			for(i=1;i<11;i++) {
+				if(getImageDataByCords(imageData,leftX,leftY+i).r < 100) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 	/*Doctor Signature*/
@@ -154,7 +170,8 @@ function qrSignature(){
 	}
 	function readDocSignature(){
 		document.getElementById("sk-folding-cube-container").style.display = 'none';
-		//contrastImage(originalCanvas,100);
+		imageColorCorrection(originalContext);
+		contrastImage(originalContext,100);
 		canvasData = originalContext.getImageData(0, 0, canvWidth, canvHeight);
         pix = canvasData.data;
 		var minX = canvWidth;
@@ -162,7 +179,7 @@ function qrSignature(){
 		var maxX = 0;
 		var maxY = 0;
 		for (var i = 0; i<pix.length; i+=4) {
-			if(pix[i] < 255){
+			if(pix[i] < 20){
 				pointX = (i / 4)%canvWidth;
 				pointY = Math.floor((i / 4)/canvWidth);
 				if(pointX<minX) {
@@ -179,9 +196,12 @@ function qrSignature(){
 				}
 			}
 		}
+		minX = minX-5;
+		minY = minY-5;
+		maxX = maxX+5;
+		maxY = maxY+5;
 		createDocFinalImage(minX,minY,maxX,maxY);
 		document.getElementById('pin_container').style.display = 'block';
-		console.log(minX+","+minY);
 		originalContext.strokeStyle = 'red';
 		originalContext.beginPath();
 		originalContext.moveTo(minX,minY);
@@ -214,6 +234,14 @@ function qrSignature(){
         var destHeight = leftDownY*5-leftSide.y*5;
         var destX = leftSide.x*5;
         var destY = leftSide.y*5;*/
+		var sourceX = leftSide.x;
+        var sourceY = leftSide.y;
+        var sourceWidth = origiLeftX-leftSide.x;
+        var sourceHeight = leftDownY-leftSide.y;
+        var destWidth = origiLeftX-leftSide.x;
+        var destHeight = leftDownY-leftSide.y;
+        var destX = leftSide.x;
+        var destY = leftSide.y;
 		
 		var sourceX = leftSide.x;
         var sourceY = leftSide.y;
@@ -225,15 +253,16 @@ function qrSignature(){
         var destY = leftSide.y;
 
         var finalCanvas = document.createElement('canvas');
+		var saveRatio = ((sourceWidth)*canvasRatio)/1024;
         finalCanvas.id = "final-canvas";
-        finalCanvas.width = sourceWidth-8;
-        finalCanvas.height = sourceHeight-8;
+        finalCanvas.width = (sourceWidth)*saveRatio;
+        finalCanvas.height = (sourceHeight)*saveRatio;
         finalCanvas.style.position = "absolute";
         finalContext = finalCanvas.getContext('2d');
         var body = document.getElementsByTagName("body")[0];
         body.appendChild(finalCanvas);
-
-        finalContext.drawImage(originalCanvas, sourceX, sourceY, (sourceWidth-8), (sourceHeight-8), -4, -4, (sourceWidth-8), (sourceHeight-8));
+		
+        finalContext.drawImage(originalCanvas, sourceX*canvasRatio, sourceY*canvasRatio, (sourceWidth)*canvasRatio, (sourceHeight)*canvasRatio, 0, 0, (sourceWidth)*saveRatio, (sourceHeight)*saveRatio);
        // contrastImage(finalContext,20);
 		//imageColorCorrection(finalContext);
 		finalImageBase64 = finalCanvas.toDataURL("image/png");
@@ -259,8 +288,11 @@ function qrSignature(){
 				leftY = leftY-1;
 				newColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
 			}
+			if(pixelTolarence(leftX,leftY,'left')) {
+				newColor = 99;
+			}
 		}
-		console.log(leftX);
+
 		leftX += 1;
 		returnObj.x = leftX;
 		returnObj.y = leftY;
@@ -348,6 +380,9 @@ function qrSignature(){
 				leftSideX = leftSideX-1;
 				newBottomColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
 			}
+			if(pixelTolarence(leftSideX,leftDownY,'bottom')) {
+				newBottomColor = 99;
+			}
 		}
 		leftDownY -= 2;
 		returnObj.x = leftSideX;
@@ -358,8 +393,6 @@ function qrSignature(){
 		//Encrypt
 		imgData = imgData.replace('data:image/png;base64,','');
 		str = unescape(encodeURIComponent(imgData));
-		console.log(cryptKey+""+unique_identifier);
-		console.log(CryptoJS.MD5(cryptKey+unique_identifier).toString());
 		enc_str = mcrypt.Encrypt(str, '', CryptoJS.MD5(cryptKey+unique_identifier).toString(), 'rijndael-256', 'ecb');
 		enc_str = btoa(enc_str);
 		var xhr = new XMLHttpRequest();
@@ -369,7 +402,7 @@ function qrSignature(){
 		xhr.send(sendObj);
 	}
 	function cutSignature(leftX,leftY){
-		
+		operationContextData = operationContext.getImageData(0,0,operationCanvas.width,operationCanvas.height).data;
 		contrastImage(operationContext,100);
 		imageColorCorrection(operationContext);
 		maxDifference = 120;
@@ -378,6 +411,7 @@ function qrSignature(){
 		origiLeftY = leftY;
 		leftX = topBorder.x;
 		leftY = topBorder.y;
+		qrTopY = topBorder.y;
 		newColor = topBorder.newColor;
 
 		rightBorder = getTheRightBorder(leftX,origiLeftY,maxDifference);
@@ -415,9 +449,9 @@ function qrSignature(){
 		operationContext.stroke();
 		document.getElementById("sk-folding-cube-container").style.display = 'none';
 		imageData = createFinalImage(leftSide);
-		console.log(imageData);
 		document.getElementById("qr-canvas").style.display = "none";
 		document.getElementById("rectangle").style.display = "none";
+		document.getElementById("original-canvas").style.display = "none";
 		document.getElementById('status').innerHTML = 'Signature is ready!';
 		sendSignature(imageData);
 		return false;
@@ -460,7 +494,11 @@ function qrSignature(){
 		operationContext.save();
 		operationContext.translate(canvas.width/2,canvas.height/2);
 		operationContext.rotate(rotationDir*rotationDegree*Math.PI/180);
-		operationContext.drawImage(canvas,-canvas.width/2,-canvas.height/2);
+		operationCanvas.width = canvas.width/canvasRatio;
+		operationCanvas.height = canvas.height/canvasRatio;
+		//operationContext.drawImage(canvas,0,0,-canvas.width/5,-canvas.height/5,0,0,-canvas.width/5,-canvas.height/5); //itt kell kicsinyíteni - próba
+		//operationContext.drawImage(canvas,-canvas.width/2,-canvas.height/2); //itt kell kicsinyíteni - próba
+		operationContext.drawImage(originalCanvas, 0, 0,canvas.width/canvasRatio,canvas.height/canvasRatio);
 		operationContext.restore();
 		/*Rotate and save the original image for the final operations*/
 		originalContext.save();
@@ -509,11 +547,8 @@ function qrSignature(){
 				break;
 			}
 		}
-		operationContext.fillStyle = 'yellow';
-		//operationContext.fillRect(newleftX,newleftY,10,10);
-		operationContext.fillStyle = 'blue';
 		contrastImage(context,100);
-		cutSignature(newleftX,newleftY);
+		cutSignature(newleftX/canvasRatio,newleftY/canvasRatio);
 	}
 	function checkQr(){
 		qrcode.callback = function(){
@@ -694,6 +729,7 @@ function qrSignature(){
 				document.getElementById('status').innerHTML = 'Image loaded!';
 				canvWidth = img.width;
 				canvHeight = img.height;
+				canvasRatio = canvWidth/1024;
 				/*canvas.width = img.width/5;
 				canvas.height = img.height/5;
 				originalCanvas.width = img.width;
@@ -719,10 +755,6 @@ function qrSignature(){
 		}
 		reader.readAsDataURL(e.target.files[0]);
 	}
-	var xhr = new XMLHttpRequest();
-		xhr.open('post', 'http://dev-api.acrossopeneyes.com/signatures', true);
-		//xhr.setRequestHeader("Authorization", "Basic " + btoa('peter.gallagher@across.co.uk' + ":" + 'apipass')); 
-		xhr.send('{"unique_identifier": "RMC1-12345","image": "YWthcm1p"}');
 	/*******TEST*********/
 	  function findPos(obj) {
 	  var curleft = 0, curtop = 0;
