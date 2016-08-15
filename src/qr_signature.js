@@ -269,21 +269,21 @@ function qrSignature(){
 		contentArr = content.split('@key:');
 		unique_identifier = contentArr[0].replace('@code:','');
 		cryptKey = contentArr[1];
-		reg = /@code:(.*)@/i;
-		matches = content.match(reg);
-		unique_identifier = matches[1];
-
-		reg = /@key:(.*)/i;
-		matches = content.match(reg);
-		cryptKey = matches[1];
-		
-		if(content.indexOf("@S:1") != -1) {
+		if(content.indexOf("@U:") != -1) {
 			docSign = true;
-			reg = /@code:(.*)/i;
+			reg = /@code:(.*)@/i;
 			matches = content.match(reg);
 			unique_identifier = matches[1];
 
-			reg = /@key:(.*)@/i;
+			reg = /@key:(.*)/i;
+			matches = content.match(reg);
+			cryptKey = matches[1];
+		} else {
+			reg = /@code:(.*)@/i;
+			matches = content.match(reg);
+			unique_identifier = matches[1];
+
+			reg = /@key:(.*)/i;
 			matches = content.match(reg);
 			cryptKey = matches[1];
 		}
