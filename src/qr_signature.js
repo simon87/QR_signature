@@ -10,7 +10,6 @@ function checkPinPass(){
 	}
 }
 
-
 var finalDocImageBase64;
 var cryptKey;
 var unique_identifier;
@@ -23,6 +22,15 @@ function sendDocSignature() {
 	var enc_str = mcrypt.Encrypt(str, '', CryptoJS.MD5(cryptKey+unique_identifier+document.getElementById('pin').value).toString(), 'rijndael-256', 'ecb');
 	enc_str = btoa(enc_str);
 	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4 && xhr.status == 200) {
+			document.getElementById('status').style.color = '#5cb85c';
+			document.getElementById('status').innerHTML = 'Signature sended.';
+		} else {
+			document.getElementById('status').style.color = 'red';
+			document.getElementById('status').innerHTML = 'An error occurred while sending the signature.';
+		}
+	};
 	xhr.open('POST', signatureUrl, true);
 	xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 	var sendObj = JSON.stringify({"unique_identifier":unique_identifier,"image":enc_str});
@@ -158,6 +166,15 @@ function qrSignature(){
 		enc_str = mcrypt.Encrypt(str, '', CryptoJS.MD5(cryptKey+unique_identifier+document.getElementById('pin').value).toString(), 'rijndael-256', 'ecb');
 		enc_str = btoa(enc_str);
 		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4 && xhr.status == 200) {
+				document.getElementById('status').style.color = '#5cb85c';
+				document.getElementById('status').innerHTML = 'Signature sended.';
+			} else {
+				document.getElementById('status').style.color = 'red';
+				document.getElementById('status').innerHTML = 'An error occurred while sending the signature.';
+			}
+		};
 		xhr.open('POST', signatureUrl, true);
 		xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 		var sendObj = JSON.stringify({"unique_identifier":unique_identifier,"image":enc_str});
@@ -252,15 +269,23 @@ function qrSignature(){
 		contentArr = content.split('@key:');
 		unique_identifier = contentArr[0].replace('@code:','');
 		cryptKey = contentArr[1];
-		reg = /@code:(.*)/i;
+		reg = /@code:(.*)@/i;
 		matches = content.match(reg);
 		unique_identifier = matches[1];
 
-		reg = /@key:(.*)@/i;
+		reg = /@key:(.*)/i;
 		matches = content.match(reg);
 		cryptKey = matches[1];
+		
 		if(content.indexOf("@S:1") != -1) {
 			docSign = true;
+			reg = /@code:(.*)/i;
+			matches = content.match(reg);
+			unique_identifier = matches[1];
+
+			reg = /@key:(.*)@/i;
+			matches = content.match(reg);
+			cryptKey = matches[1];
 		}
 		/*url = content.split(";")[0];
 		key = content.split(";")[1];*/
