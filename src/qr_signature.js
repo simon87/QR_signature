@@ -200,7 +200,7 @@ function qrSignature(){
         var destHeight = sourceHeight;
 
         var finalCanvas = document.createElement('canvas');
-		var finalRatio = 600/(sourceWidth);
+		var finalRatio = 300/(sourceWidth);
         finalCanvas.id = "final-canvas";
         finalCanvas.width = sourceWidth*finalRatio;
         finalCanvas.height = sourceHeight*finalRatio;
@@ -319,7 +319,7 @@ function qrSignature(){
         var destY = leftSide.y;
 
         var finalCanvas = document.createElement('canvas');
-		var finalRatio = 600/(sourceWidth);
+		var finalRatio = 300/(sourceWidth);
 		var saveRatio = ((sourceWidth)*canvasRatio)/1024;
         finalCanvas.id = "final-canvas";
         finalCanvas.width = (sourceWidth)*finalRatio;
