@@ -9,6 +9,25 @@ function checkPinPass(){
 		document.getElementById('send_pin_btn').disabled = true;
 	}
 }
+
+
+var finalDocImageBase64;
+var cryptKey;
+var unique_identifier;
+var signatureUrl = 'http://dev-api.acrossopeneyes.com/signatures';
+//var signatureUrl = 'http://127.0.0.1/qr_signature_heroku/peaceful-lowlands-44823/web/ajax.php';
+function sendDocSignature() {
+	//Encrypt
+	finalDocImageBase64 = finalDocImageBase64.replace('data:image/png;base64,','');
+	var str = unescape(encodeURIComponent(finalDocImageBase64));
+	var enc_str = mcrypt.Encrypt(str, '', CryptoJS.MD5(cryptKey+unique_identifier+document.getElementById('pin').value).toString(), 'rijndael-256', 'ecb');
+	enc_str = btoa(enc_str);
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', signatureUrl, true);
+	xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+	var sendObj = JSON.stringify({"unique_identifier":unique_identifier,"image":enc_str});
+	xhr.send(sendObj);
+}
 function qrSignature(){
 	checkUserMedia();
 	/*Global variables*/
@@ -28,10 +47,8 @@ function qrSignature(){
 	var imgIsReady = false;
 	var qrCodeIsReady = false;
 	var canvasRatio;
-	//var signatureUrl = 'http://dev-api.acrossopeneyes.com/signatures';
-	var signatureUrl = 'http://127.0.0.1/qr_signature_heroku/peaceful-lowlands-44823/web/ajax.php';
-	var unique_identifier = '';
-	var cryptKey = '';
+
+	cryptKey = '';
 	
 	var docSign = false;
 	var docQrReaded = false;
@@ -101,7 +118,7 @@ function qrSignature(){
 		imageData = operationContextData;
 		if(direction == 'left') {
 			leftX = leftX-1;
-			for(i=10;i>0;i--) {
+			for(var i=10;i>0;i--) {
 				if(getImageDataByCords(imageData,leftX-i,leftY).r < 100) {
 					return true;
 				}
@@ -109,8 +126,24 @@ function qrSignature(){
 			return false;
 		} else if(direction == 'bottom') {
 			leftY = leftY+1;
-			for(i=1;i<11;i++) {
+			for(var i=1;i<11;i++) {
 				if(getImageDataByCords(imageData,leftX,leftY+i).r < 100) {
+					return true;
+				}
+			}
+			return false;
+		} else if(direction == 'topBlack') {
+			leftY = leftY-1;
+			for(var i=1;i<10;i++) {
+				if(getImageDataByCords(imageData,leftX,leftY-i).r < 100) {
+					return true;
+				}
+			}
+			return false;
+		} else if(direction == 'topWhite') {
+			leftY = leftY-1;
+			for(var i=1;i<10;i++) {
+				if(getImageDataByCords(imageData,leftX,leftY-i).r > 100) {
 					return true;
 				}
 			}
@@ -150,18 +183,19 @@ function qrSignature(){
         var destHeight = sourceHeight;
 
         var finalCanvas = document.createElement('canvas');
+		var finalRatio = 600/(sourceWidth);
         finalCanvas.id = "final-canvas";
-        finalCanvas.width = sourceWidth;
-        finalCanvas.height = sourceHeight;
+        finalCanvas.width = sourceWidth*finalRatio;
+        finalCanvas.height = sourceHeight*finalRatio;
         finalCanvas.style.position = "absolute";
         finalContext = finalCanvas.getContext('2d');
         var body = document.getElementsByTagName("body")[0];
         body.appendChild(finalCanvas);
-        finalContext.drawImage(originalCanvas, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sourceWidth, sourceHeight);
+        finalContext.drawImage(originalCanvas, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, sourceWidth*finalRatio, sourceHeight*finalRatio);
        // contrastImage(finalContext,20);
 		//imageColorCorrection(finalContext);
-		finalImageBase64 = finalCanvas.toDataURL("image/png");
-		return finalImageBase64;
+		finalDocImageBase64 = finalCanvas.toDataURL("image/png");
+		return finalDocImageBase64;
 	}
 	function takeDocSignPicture() {
 		document.getElementById("input").style.display = "block";
@@ -218,6 +252,13 @@ function qrSignature(){
 		contentArr = content.split('@key:');
 		unique_identifier = contentArr[0].replace('@code:','');
 		cryptKey = contentArr[1];
+		reg = /@code:(.*)/i;
+		matches = content.match(reg);
+		unique_identifier = matches[1];
+
+		reg = /@key:(.*)@/i;
+		matches = content.match(reg);
+		cryptKey = matches[1];
 		if(content.indexOf("@S:1") != -1) {
 			docSign = true;
 		}
@@ -253,18 +294,21 @@ function qrSignature(){
         var destY = leftSide.y;
 
         var finalCanvas = document.createElement('canvas');
+		var finalRatio = 600/(sourceWidth);
 		var saveRatio = ((sourceWidth)*canvasRatio)/1024;
         finalCanvas.id = "final-canvas";
-        finalCanvas.width = (sourceWidth)*saveRatio;
-        finalCanvas.height = (sourceHeight)*saveRatio;
+        finalCanvas.width = (sourceWidth)*finalRatio;
+        finalCanvas.height = (sourceHeight)*finalRatio;
         finalCanvas.style.position = "absolute";
         finalContext = finalCanvas.getContext('2d');
         var body = document.getElementsByTagName("body")[0];
         body.appendChild(finalCanvas);
 		
-        finalContext.drawImage(originalCanvas, sourceX*canvasRatio, sourceY*canvasRatio, (sourceWidth)*canvasRatio, (sourceHeight)*canvasRatio, 0, 0, (sourceWidth)*saveRatio, (sourceHeight)*saveRatio);
-       // contrastImage(finalContext,20);
-		//imageColorCorrection(finalContext);
+       // finalContext.drawImage(originalCanvas, sourceX/canvasRatio, sourceY/canvasRatio, (sourceWidth)/canvasRatio, (sourceHeight)/canvasRatio, 0, 0, (sourceWidth)/saveRatio, (sourceHeight)/saveRatio);
+	   
+        finalContext.drawImage(originalCanvas, sourceX*canvasRatio, sourceY*canvasRatio, (sourceWidth)*canvasRatio, (sourceHeight)*canvasRatio, 0, 0, (sourceWidth)*finalRatio, (sourceHeight)*finalRatio);
+        contrastImage(finalContext,80);
+		imageColorCorrection(finalContext);
 		finalImageBase64 = finalCanvas.toDataURL("image/png");
 		return finalImageBase64;
 	}
@@ -301,12 +345,12 @@ function qrSignature(){
 		//operationContext.fillRect(leftX,leftY,10,10);
 	}
 	function getTheTopBorder(leftTopX,leftTopY,maxDifference){
-		for(i=0;i<4;i++){
+		for(var k=0;k<4;k++){
 			pixColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
 			newColor = pixColor;
 			/*Find white*/
-			if(i%2 == 0) {
-				while(newColor < 10 && leftTopY > 1) {
+			if(k%2 == 0) {
+				while(newColor < 100 && leftTopY > 1) {
 					leftTopY = leftTopY-1;
 					/*Check the right and left pixels color (if the top black line is damaged, or not well-photographed it's help)*/
 					leftPixelColor = operationContext.getImageData(leftTopX-1, leftTopY, 1, 1).data[0];
@@ -318,9 +362,12 @@ function qrSignature(){
 					} else {
 						newColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
 					}
+					if(pixelTolarence(leftTopX,leftTopY,'topBlack')) {
+						newColor = 9;
+					}
 				}
 			} else {
-				while(newColor > 10 && leftTopY > 1) {
+				while(newColor > 100 && leftTopY > 1) {
 					leftTopY = leftTopY-1;
 					/*Check the right and left pixels color (if the top black line is damaged, or not well-photographed it's help)*/
 					leftPixelColor = operationContext.getImageData(leftTopX-1, leftTopY, 1, 1).data[0];
@@ -331,10 +378,14 @@ function qrSignature(){
 						newColor = rightPixelColor;
 					} else {
 						newColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
+					}
+					if(pixelTolarence(leftTopX,leftTopY,'topWhite')) {
+						newColor = 200;
 					}
 				}
 			}
 		}
+		operationContext.fillRect(leftTopX,leftTopY,10,10);
 		returnObj = {}
 		returnObj.x = leftTopX;
 		returnObj.y = leftTopY;
@@ -577,8 +628,9 @@ function qrSignature(){
 		} catch(e){
 			document.getElementById('status').style.color = 'red';
 			document.getElementById('status').innerHTML = 'QR code recognize failed, please try again. Error message:'+e;
-			/*document.getElementById("file_button").style.display = 'block';
-			document.getElementById("sk-folding-cube-container").style.display = 'none';*/
+			document.getElementById("file_button").style.display = 'block';
+			document.getElementById("input").style.display = 'block';
+			document.getElementById("sk-folding-cube-container").style.display = 'none';
 		}
 	}
 	function drawVideo(){

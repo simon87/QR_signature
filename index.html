@@ -38,14 +38,14 @@
 		<div class="sk-cube3 sk-cube"></div>
 	</div>
 	<video style="display:none;" id='video'></video>
-	<canvas id='original-canvas'></canvas>
+	<canvas id='original-canvas' style="display:none;"></canvas>
 	<div id='rectangle'></div>
 	<canvas id='qr-canvas' style="display:none;"></canvas>
 	<canvas id='operation-canvas' style="display:none;"></canvas>
 	<div id='qr-content'></div>
 	<div id='pin_container' style="display:none;">
 		<input type="password" maxlength="4" id="pin" onkeyup="checkPinPass();" /><br />
-		<button id="send_pin_btn" onclick="sendDocSignature()" disabled>SEND</button>
+		<button id="send_pin_btn" onclick="sendDocSignature()" disabled="true">SEND</button>
 	</div>
 	<div id="file_button" class="file_button_container" style="display:none;"><input type="file" id="input" name="input" accept="image/*" capture="camera"></input></div>
 	<script>
