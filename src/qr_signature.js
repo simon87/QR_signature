@@ -142,7 +142,7 @@ function qrSignature(){
 			return false;
 		} else if(direction == 'topBlack') {
 			leftY = leftY-1;
-			for(var i=1;i<10;i++) {
+			for(var i=1;i<5;i++) {
 				if(getImageDataByCords(imageData,leftX,leftY-i).r < 100) {
 					return true;
 				}
@@ -150,7 +150,7 @@ function qrSignature(){
 			return false;
 		} else if(direction == 'topWhite') {
 			leftY = leftY-1;
-			for(var i=1;i<10;i++) {
+			for(var i=1;i<5;i++) {
 				if(getImageDataByCords(imageData,leftX,leftY-i).r > 100) {
 					return true;
 				}
