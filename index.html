@@ -1,6 +1,7 @@
 <!DOCTYPE HTML>
 <html>
 	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 		<link rel="stylesheet" type="text/css" href="styles/style.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 		<script type="text/javascript" src="src/3rd_party/grid.js"></script>
@@ -25,11 +26,11 @@
 		<script type="text/javascript" src="src/3rd_party/rijndael/mcrypt.js"></script>
 		<script type="text/javascript" src="src/3rd_party/rijndael/core.js"></script>
 		<script type="text/javascript" src="src/3rd_party/rijndael/md5-min.js"></script>
-		<script type="text/javascript" src="src/qr_signature.js"></script>
+		<script type="text/javascript" src="src/qr_signature.js?ver=0.61"></script>
 		<link rel="manifest" href="src/manifest.json">
 	</head>
 	<body>
-	<!-- This is a test test file, while the developing is in progress -->
+	<!-- This is a test file, while the developing is in progress -->
 	<div id='status' style='position:fixed;top:0;left:0;font-family:Verdana;text-align:center;'></div>
 	<div id="sk-folding-cube-container" class="sk-folding-cube">
 		<div class="sk-cube1 sk-cube"></div>
@@ -47,7 +48,13 @@
 		<input type="password" maxlength="4" id="pin" onkeyup="checkPinPass();" /><br />
 		<button id="send_pin_btn" onclick="sendDocSignature()" disabled="true">SEND</button>
 	</div>
+	<div id="take_picture_container" style="height:100%;position:fixed;top:0;left:0;display:none;">
+		<img id="take_picture" src="images/take_picture.png">
+	</div>
 	<div id="file_button" class="file_button_container" style="display:none;"><input type="file" id="input" name="input" accept="image/*" capture="camera"></input></div>
+	<div id="turn_phone" style="position:fixed;top:0px;left:1px;width:100%;height:100%;display:none;background-color:#FFF;text-align:center;">
+		<img id="turn_image" src="images/rotate_yourn_phone.png" />
+	</div>
 	<script>
 		test = new qrSignature();
 	</script>

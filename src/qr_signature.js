@@ -60,6 +60,57 @@ function qrSignature(){
 	
 	var docSign = false;
 	var docQrReaded = false;
+
+	if(Math.abs(window.orientation) !== 90){
+		document.getElementById('turn_phone').style.display = 'block';
+		document.getElementById('turn_phone').style.marginTop = '100px';
+		document.getElementById('turn_image').width = window.innerWidth-50;
+	} else {
+		document.getElementById('take_picture_container').style.display = 'block';
+		document.getElementById('take_picture').height = window.innerHeight-50;
+		document.getElementById('turn_phone').style.display = 'none';
+		
+		input_btn = document.getElementById("input");
+		input_btn.style.height = window.innerHeight/10+"px";
+		input_btn.style.width = window.innerWidth/10+"px";
+		input_btn.style.backgroundSize = "\""+(window.innerHeight/10)+"px\"";
+		
+		btn_container = document.getElementById("file_button");
+		btn_container.style.display = "block";
+		btn_container.style.top = (window.innerHeight-window.innerHeight/10)/2+"px";
+		btn_container.style.right = "10px";
+		btn_container.style.backgroundSize = (window.innerHeight/10)+"px";
+		btn_container.style.width = window.innerWidth/10+"px";
+		btn_container.style.height = window.innerHeight/10+"px";
+		document.getElementById('take_picture_container').style.display = 'block';
+		document.getElementById('take_picture').height = window.innerHeight;
+	}
+		
+	// Listen for orientation changes
+	window.addEventListener("orientationchange", function() {
+		if(Math.abs(window.orientation) !== 90){
+			document.getElementById('turn_phone').style.display = 'block';
+			document.getElementById('turn_phone').style.marginTop = '100px';
+			document.getElementById('turn_image').width = window.innerHeight;
+			document.getElementById('take_picture_container').style.display = 'none';
+		} else {
+			document.getElementById('turn_phone').style.display = 'none';
+			input_btn = document.getElementById("input");
+			input_btn.style.width = (window.innerHeight/10)+"px";
+			input_btn.style.height = (window.innerWidth/10)+"px";
+			input_btn.style.backgroundSize = "\""+(window.innerHeight/10)+"px\"";
+			
+			btn_container = document.getElementById("file_button");
+			btn_container.style.width = window.innerHeight/10+"px";
+			btn_container.style.height = window.innerWidth/10+"px";
+			btn_container.style.display = "block";
+			btn_container.style.top =(window.innerWidth-(window.innerWidth/10))/2+"px";
+			btn_container.style.right = "10px";
+			btn_container.style.backgroundSize = (window.innerHeight/10)+"px";
+			document.getElementById('take_picture_container').style.display = 'block';
+			document.getElementById('take_picture').height = window.innerWidth-50;
+		}
+	}, false);
 	/**
 	 * @FIXME create a new class for the image manipulation functions
 	 */
@@ -287,6 +338,7 @@ function qrSignature(){
 			matches = content.match(reg);
 			cryptKey = matches[1];
 		}
+		//alert(content);
 		/*url = content.split(";")[0];
 		key = content.split(";")[1];*/
 		//document.getElementById('qr-content').innerHTML = '<b>URL:</b>'+url+'<br /><b>Key:</b>'+key;
@@ -319,11 +371,13 @@ function qrSignature(){
         var destY = leftSide.y;
 
         var finalCanvas = document.createElement('canvas');
+		//var finalRatio = 300/(sourceWidth);
 		var finalRatio = 300/(sourceWidth);
 		var saveRatio = ((sourceWidth)*canvasRatio)/1024;
         finalCanvas.id = "final-canvas";
         finalCanvas.width = (sourceWidth)*finalRatio;
         finalCanvas.height = (sourceHeight)*finalRatio;
+        alert(finalCanvas.height+','+finalCanvas.width);
         finalCanvas.style.position = "absolute";
         finalContext = finalCanvas.getContext('2d');
         var body = document.getElementsByTagName("body")[0];
@@ -334,6 +388,7 @@ function qrSignature(){
         finalContext.drawImage(originalCanvas, sourceX*canvasRatio, sourceY*canvasRatio, (sourceWidth)*canvasRatio, (sourceHeight)*canvasRatio, 0, 0, (sourceWidth)*finalRatio, (sourceHeight)*finalRatio);
         contrastImage(finalContext,80);
 		imageColorCorrection(finalContext);
+		finalCanvas.style.display = 'block';
 		finalImageBase64 = finalCanvas.toDataURL("image/png");
 		return finalImageBase64;
 	}
@@ -648,13 +703,13 @@ function qrSignature(){
 		}
 		try{
 			//imageColorCorrection(context);
-			//contrastImage(context,100);
+			//contrastImage(context,30);
 			qrcode.decode();
 		} catch(e){
 			document.getElementById('status').style.color = 'red';
 			document.getElementById('status').innerHTML = 'QR code recognize failed, please try again. Error message:'+e;
-			document.getElementById("file_button").style.display = 'block';
-			document.getElementById("input").style.display = 'block';
+			/*document.getElementById("file_button").style.display = 'block';
+			document.getElementById("input").style.display = 'block';*/
 			document.getElementById("sk-folding-cube-container").style.display = 'none';
 		}
 	}
@@ -670,17 +725,23 @@ function qrSignature(){
 		}
 	}
 	function checkUserMedia() {
-		noUserMedia();
-		return false;
+		/*noUserMedia();
+		return false;*/
 		navigator.getUserMedia = (navigator.getUserMedia || 
 								 navigator.webkitGetUserMedia || 
 								 navigator.mozGetUserMedia || 
 								 navigator.msGetUserMedia);
+		navigator.getUserMedia = false;
 		if (navigator.getUserMedia) {
 			//Request access to video only
 			navigator.getUserMedia(
 			{
-				video:true,
+				 video: {
+                        mandatory: {
+							minWidth: 1280,
+							minHeight: 720
+						}
+                    },
 				audio:false
 			},        
 				function(stream) {
@@ -688,6 +749,7 @@ function qrSignature(){
 					video.src = url ? url.createObjectURL(stream) : stream;
 					video.play();
 					localStream = stream;
+					document.getElementById('qr-canvas').style.display = 'block';
 				},
 				function(error) {
 					alert('Something went wrong. (error code ' + error.code + ')');
@@ -698,6 +760,7 @@ function qrSignature(){
 			noUserMedia();
 		}
 		video.addEventListener('playing', function() {
+				alert(video.videoWidth);
 				canvWidth = video.videoWidth;
 				canvHeight = video.videoHeight;
 				canvas.width = video.videoWidth;
@@ -706,6 +769,11 @@ function qrSignature(){
 				originalCanvas.height = video.videoHeight;
 				operationCanvas.width = video.videoWidth;
 				operationCanvas.height = video.videoHeight;
+				if(canvWidth <= 1024) {
+					canvasRatio = 1;
+				} else {
+					canvasRatio = canvWidth/1024;
+				}
 				originalContext.drawImage(video, 0, 0);
 				$("#find_qr_btn").css("display","block");
 				/*context.drawImage(video, 0, 0,img.width/5,img.height);
@@ -771,7 +839,7 @@ function qrSignature(){
 	function noUserMedia(){
 		input = document.getElementById("input");
 		input.addEventListener("change", handleFile);
-		input_btn = document.getElementById("input");
+		/*input_btn = document.getElementById("input");
 		input_btn.style.height = window.innerHeight-window.innerHeight/2+"px";
 		input_btn.style.width = window.innerHeight-window.innerHeight/2+"px";
 		input_btn.style.backgroundSize = "\""+(window.innerHeight-window.innerHeight/2)+"px\"";
@@ -779,8 +847,8 @@ function qrSignature(){
 		btn_container.style.display = "block";
 		btn_container.style.top = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
 		btn_container.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";
-		btn_container.style.backgroundSize = (window.innerHeight-window.innerHeight/2)+"px";
-		input_btn.style.display = "block";
+		btn_container.style.backgroundSize = (window.innerHeight-window.innerHeight/2)+"px";*/
+		document.getElementById("input").style.display = "block";
 		loaderContainer = document.getElementById("sk-folding-cube-container");
 		loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
 		loaderContainer.style.height = (window.innerHeight-window.innerHeight/2)+"px";
