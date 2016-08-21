@@ -61,6 +61,7 @@ function qrSignature(){
 	var docSign = false;
 	var docQrReaded = false;
 
+	var photoTaked = false;
 	if(Math.abs(window.orientation) !== 90){
 		document.getElementById('turn_phone').style.display = 'block';
 		document.getElementById('turn_phone').style.marginTop = '100px';
@@ -89,26 +90,40 @@ function qrSignature(){
 	// Listen for orientation changes
 	window.addEventListener("orientationchange", function() {
 		if(Math.abs(window.orientation) !== 90){
-			document.getElementById('turn_phone').style.display = 'block';
-			document.getElementById('turn_phone').style.marginTop = '100px';
-			document.getElementById('turn_image').width = window.innerHeight;
-			document.getElementById('take_picture_container').style.display = 'none';
+			if(!photoTaked) {
+				document.getElementById('turn_phone').style.display = 'block';
+				document.getElementById('turn_phone').style.marginTop = '100px';
+				document.getElementById('turn_image').width = window.innerHeight;
+				document.getElementById('take_picture_container').style.display = 'none';
+			} else {
+				loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
+				loaderContainer.style.height = (window.innerHeight-window.innerHeight/2)+"px";
+				loaderContainer.style.top = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
+				loaderContainer.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";
+			}
 		} else {
-			document.getElementById('turn_phone').style.display = 'none';
-			input_btn = document.getElementById("input");
-			input_btn.style.width = (window.innerHeight/8)+"px";
-			input_btn.style.height = (window.innerHeight/8)+"px";
-			input_btn.style.backgroundSize = "\""+(window.innerHeight/8)+"px\"";
-			
-			btn_container = document.getElementById("file_button");
-			btn_container.style.width = window.innerHeight/8+"px";
-			btn_container.style.height = window.innerHeight/8+"px";
-			btn_container.style.display = "block";
-			btn_container.style.top =(window.innerWidth-(window.innerWidth/10))/2+"px";
-			btn_container.style.right = "10px";
-			btn_container.style.backgroundSize = (window.innerHeight/8)+"px";
-			document.getElementById('take_picture_container').style.display = 'block';
-			document.getElementById('take_picture').height = window.innerWidth-50;
+			if(!photoTaked) {
+				document.getElementById('turn_phone').style.display = 'none';
+				input_btn = document.getElementById("input");
+				input_btn.style.width = (window.innerHeight/8)+"px";
+				input_btn.style.height = (window.innerHeight/8)+"px";
+				input_btn.style.backgroundSize = "\""+(window.innerHeight/8)+"px\"";
+				
+				btn_container = document.getElementById("file_button");
+				btn_container.style.width = window.innerHeight/8+"px";
+				btn_container.style.height = window.innerHeight/8+"px";
+				btn_container.style.display = "block";
+				btn_container.style.top =(window.innerWidth-(window.innerWidth/10))/2+"px";
+				btn_container.style.right = "10px";
+				btn_container.style.backgroundSize = (window.innerHeight/8)+"px";
+				document.getElementById('take_picture_container').style.display = 'block';
+				document.getElementById('take_picture').height = window.innerWidth-50;
+			} else {
+				loaderContainer.style.width = (window.innerWidth-window.innerWidth/2)+"px";
+				loaderContainer.style.height = (window.innerWidth-window.innerWidth/2)+"px";
+				loaderContainer.style.top = (window.innerWidth-(window.innerWidth-window.innerWidth/2))/2+"px";
+				loaderContainer.style.left = (window.innerWidth-(window.innerWidth-window.innerWidth/2))/2+"px";
+			}
 		}
 	}, false);
 	/**
@@ -177,7 +192,7 @@ function qrSignature(){
 		imageData = operationContextData;
 		if(direction == 'left') {
 			leftX = leftX-1;
-			for(var i=10;i>0;i--) {
+			for(var i=5;i>0;i--) {
 				if(getImageDataByCords(imageData,leftX-i,leftY).r < 100) {
 					return true;
 				}
@@ -185,7 +200,7 @@ function qrSignature(){
 			return false;
 		} else if(direction == 'bottom') {
 			leftY = leftY+1;
-			for(var i=1;i<11;i++) {
+			for(var i=1;i<6;i++) {
 				if(getImageDataByCords(imageData,leftX,leftY+i).r < 100) {
 					return true;
 				}
@@ -345,6 +360,7 @@ function qrSignature(){
 		//document.getElementById('qr-content').innerHTML = '<b>URL:</b>'+url+'<br /><b>Key:</b>'+key;
 	}
 	function createFinalImage(leftSide){
+		//alert('final');
 		/*var sourceX = leftSide.x*5;
         var sourceY = leftSide.y*5;
         var sourceWidth = origiLeftX*5-leftSide.x*5;
@@ -396,6 +412,7 @@ function qrSignature(){
 		return finalImageBase64;
 	}
 	function getTheLeftBorder(leftX,leftY) {
+		//alert('left');
 		returnObj = {};
 		pixColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
 		newColor = pixColor;
@@ -428,6 +445,7 @@ function qrSignature(){
 		//operationContext.fillRect(leftX,leftY,10,10);
 	}
 	function getTheTopBorder(leftTopX,leftTopY,maxDifference){
+		//alert('top');
 		for(var k=0;k<4;k++){
 			pixColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
 			newColor = pixColor;
@@ -476,6 +494,7 @@ function qrSignature(){
 		return returnObj;
 	}
 	function getTheRightBorder(leftTopX,leftTopY,maxDifference){
+		//alert('right');
 		for(i=0;i<3;i++){
 			pixColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
 			newColor = pixColor;
@@ -498,6 +517,7 @@ function qrSignature(){
 		return returnObj;
 	}
 	function getTheBottomBorder(leftSideX,leftDownY,newBottomColor){
+		//alert('bottom');
 		returnObj = {};
 		pixColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
 		newBottomColor = pixColor;
@@ -711,8 +731,10 @@ function qrSignature(){
 		} catch(e){
 			document.getElementById('status').style.color = 'red';
 			document.getElementById('status').innerHTML = 'QR code recognize failed, please try again. Error message:'+e;
-			/*document.getElementById("file_button").style.display = 'block';
-			document.getElementById("input").style.display = 'block';*/
+			photoTaked = false;
+			document.getElementById("file_button").style.display = 'block';
+			document.getElementById("input").style.display = 'block';
+			document.getElementById("take_picture_container").style.display = 'block';
 			document.getElementById("sk-folding-cube-container").style.display = 'none';
 		}
 	}
@@ -739,12 +761,7 @@ function qrSignature(){
 			//Request access to video only
 			navigator.getUserMedia(
 			{
-				 video: {
-                        mandatory: {
-							minWidth: 1280,
-							minHeight: 720
-						}
-                    },
+				video:true,
 				audio:false
 			},        
 				function(stream) {
@@ -859,8 +876,10 @@ function qrSignature(){
 		loaderContainer.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";
 	}
 	function handleFile(e) {
+		photoTaked = true;
 		document.getElementById("file_button").style.display = 'none';
 		document.getElementById("sk-folding-cube-container").style.display = 'block';
+		
 		setTimeout(function(){loadFile(e); }, 500);
 	}
 	function loadFile(e){
@@ -880,21 +899,21 @@ function qrSignature(){
 				canvWidth = img.width;
 				canvHeight = img.height;
 				canvasRatio = canvWidth/1024;
-				/*canvas.width = img.width/5;
-				canvas.height = img.height/5;
-				originalCanvas.width = img.width;
-				originalCanvas.height = img.height;
-				operationCanvas.width = img.width/5;
-				operationCanvas.height = img.height/5;*/
 				canvas.width = img.width;
 				canvas.height = img.height;
 				originalCanvas.width = img.width;
 				originalCanvas.height = img.height;
+				operationCanvas.width = img.width/canvasRatio;
+				operationCanvas.height = img.height/canvasRatio;
+				/*canvas.width = img.width;
+				canvas.height = img.height;
+				originalCanvas.width = img.width;
+				originalCanvas.height = img.height;
 				operationCanvas.width = img.width;
-				operationCanvas.height = img.height;
+				operationCanvas.height = img.height;*/
 				originalContext.drawImage(img, 0, 0);
 				context.drawImage(img, 0, 0,img.width,img.height);
-				operationContext.drawImage(img, 0, 0,img.width,img.height);
+				operationContext.drawImage(img, 0, 0,img.width/canvasRatio,img.height/canvasRatio);
 				document.getElementById("input").style.display = "none";
 				if(!docQrReaded) {
 					checkQr();
