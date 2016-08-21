@@ -521,16 +521,16 @@ function qrSignature(){
 		returnObj = {};
 		pixColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
 		newBottomColor = pixColor;
-		while(newBottomColor < 100 && leftDownY < canvHeight) {
+		while(newBottomColor < 150 && leftDownY < operationCanvas.height) {
 			leftDownY+=1;
 			newBottomColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
 			checkRightColor = operationContext.getImageData(leftSideX+1, leftDownY, 1, 1).data[0];
 			checkLeftColor = operationContext.getImageData(leftSideX-1, leftDownY, 1, 1).data[0];
 			newBottomColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
-			if(checkRightColor < newBottomColor && checkRightColor < 100 && leftDownY<canvHeight){
+			if(checkRightColor < newBottomColor && checkRightColor < 150 && leftDownY<operationCanvas.height){
 				leftSideX = leftSideX+1;
 				newBottomColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
-			} else if (checkLeftColor < newBottomColor && checkLeftColor < 100 && leftDownY<canvHeight) {
+			} else if (checkLeftColor < newBottomColor && checkLeftColor < 150 && leftDownY<operationCanvas.height) {
 				leftSideX = leftSideX-1;
 				newBottomColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
 			}
@@ -572,24 +572,28 @@ function qrSignature(){
 		leftX = rightBorder.x;
 		leftY = leftY-1;
 		origiLeftX = leftX;
-		/*operationContext.fillStyle = 'yellow';
-		operationContext.fillRect(rightBorder.x,rightBorder.y,10,10);
-		return false;*/
+
 		leftSide = getTheLeftBorder(leftX,leftY);
 		leftX = leftSide.x;
 		leftY = leftSide.y;
 
-		bottomPos = getTheBottomBorder(leftSide.x,leftSide.y,leftSide.newColor);
-
+		//bottomPos = getTheBottomBorder(leftSide.x,leftSide.y,leftSide.newColor);
+		//Test the new method
+		bottomPos = {};
+		bottomPos.y = leftSide.y+((rightBorder.x-leftSide.x)/3);
+		bottomPos.x = leftSide.x;
 		//return false;
 		leftX = bottomPos.x;
 		leftDownY = bottomPos.y;
+		/*operationContext.fillStyle = 'yellow';
+		operationContext.fillRect(bottomPos.x,bottomPos.y,10,10);
+		return false;*/
 		/*if(leftY+150 > leftDownY) {
 			qrCodeIsReady = false;
 			drawVideo();
 			return false;
 		}*/
-		operationContext.lineWidth = 1;
+		//operationContext.lineWidth = 1;
 
 		/*Test draw*/
 		operationContext.strokeStyle = 'red';
@@ -614,6 +618,7 @@ function qrSignature(){
 	}
 	/*Rotate to horizontal by the two top markers*/
 	function rotateToHorizontal(){
+
 		var pointA = {};
 		var pointB = {};
 		var lastPatternIndex = qrcode.patternPos.length-1;
@@ -702,6 +707,7 @@ function qrSignature(){
 			}
 		}
 		contrastImage(context,100);
+
 		cutSignature(newleftX/canvasRatio,newleftY/canvasRatio);
 	}
 	function checkQr(){
