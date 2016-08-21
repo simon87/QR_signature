@@ -648,6 +648,7 @@ function qrSignature(){
 		}
 		/*Get the alpha angle*/
 		rotationDegree = Math.asin(sideA/sideC) * 180/Math.PI;
+		//alert(rotationDegree); //0.71
 		/*Let's draw the rotated frame*/
 		operationContext.clearRect(0, 0, canvWidth, canvHeight);
 		operationContext.save();
@@ -667,14 +668,14 @@ function qrSignature(){
 		originalContext.restore();
 		
 		/*creating the "blue"*/
+		
 		context.fillStyle = 'blue';
 		context.fillRect( qrcode.patternPos[lastPatternIndex][1].x, qrcode.patternPos[lastPatternIndex][1].y, 2, 2);
-		
-		context.save();
+		//context.save();
 		context.translate(canvas.width/2,canvas.height/2);
 		context.rotate(rotationDir*rotationDegree*Math.PI/180);
 		context.drawImage(canvas,-canvas.width/2,-canvas.height/2);
-		context.restore();
+		//context.restore();
 		
 		/*QR code ROTATED left-top marker position*/
 		pointA.x = canvWidth/2;
@@ -707,7 +708,7 @@ function qrSignature(){
 			}
 		}
 		contrastImage(context,100);
-
+		
 		cutSignature(newleftX/canvasRatio,newleftY/canvasRatio);
 	}
 	function checkQr(){
@@ -888,6 +889,48 @@ function qrSignature(){
 		
 		setTimeout(function(){loadFile(e); }, 500);
 	}
+	function drawImageToFile(img) {
+		//document.getElementsByTagName('body')[0].innerHTML = '<img src='+img.src+' />';
+		//alert(img.width+', '+img.height);
+		canvas.width = img.width;
+		canvas.height = img.height;
+		context.drawImage(img, 0, 0,img.width,img.height);
+		/*if(img.width < img.height) {
+			canvas.width = img.height;
+			canvas.height = img.width;
+			context.translate(canvas.width/2,canvas.height/2);
+			context.rotate(-Math.PI/2);
+			context.drawImage(img,-img.width/2,-img.height/2);
+			context.translate(-canvas.width/2,-canvas.height/2);
+			context.restore();
+			context.save();
+		}*/
+		
+		document.getElementById('status').innerHTML = 'Image loaded!';
+		canvWidth = canvas.width;
+		canvHeight = canvas.height;
+		canvasRatio = canvWidth/1024;
+		originalCanvas.width = canvas.width;
+		originalCanvas.height = canvas.height;
+		operationCanvas.width = canvas.width/canvasRatio;
+		operationCanvas.height = canvas.height/canvasRatio;
+		/*canvas.width = img.width;
+		canvas.height = img.height;
+		originalCanvas.width = img.width;
+		originalCanvas.height = img.height;
+		operationCanvas.width = img.width;
+		operationCanvas.height = img.height;*/
+		originalContext.drawImage(canvas, 0, 0);
+		
+		operationContext.drawImage(canvas, 0, 0,canvas.width/canvasRatio,canvas.height/canvasRatio);
+		document.getElementById("input").style.display = "none";
+
+		if(!docQrReaded) {
+			checkQr();
+		} else {
+			readDocSignature();
+		}
+	}
 	function loadFile(e){
 		document.getElementById('status').innerHTML = 'Image loading...';
 		var canvas = document.getElementById('qr-canvas');
@@ -901,30 +944,33 @@ function qrSignature(){
 			var img = new Image();
 			img.src = reader.result;
 			img.onload = function () {
-				document.getElementById('status').innerHTML = 'Image loaded!';
-				canvWidth = img.width;
-				canvHeight = img.height;
-				canvasRatio = canvWidth/1024;
-				canvas.width = img.width;
-				canvas.height = img.height;
-				originalCanvas.width = img.width;
-				originalCanvas.height = img.height;
-				operationCanvas.width = img.width/canvasRatio;
-				operationCanvas.height = img.height/canvasRatio;
-				/*canvas.width = img.width;
-				canvas.height = img.height;
-				originalCanvas.width = img.width;
-				originalCanvas.height = img.height;
-				operationCanvas.width = img.width;
-				operationCanvas.height = img.height;*/
-				originalContext.drawImage(img, 0, 0);
-				context.drawImage(img, 0, 0,img.width,img.height);
-				operationContext.drawImage(img, 0, 0,img.width/canvasRatio,img.height/canvasRatio);
-				document.getElementById("input").style.display = "none";
-				if(!docQrReaded) {
-					checkQr();
+				/*When the image is rotated*/
+				if(img.width < img.height) {
+					var rotateCanvas = document.createElement('canvas');
+					rotateCanvas.id = "rotateCanvas";
+					rotateCanvas.width = img.height;
+					rotateCanvas.height = img.width;
+					rotateCanvas.style.display = "none";
+					rotateContext = rotateCanvas.getContext('2d');
+					var body = document.getElementsByTagName("body")[0];
+					body.appendChild(rotateCanvas);
+					
+					rotateContext.translate(rotateCanvas.width/2,rotateCanvas.height/2);
+					rotateContext.rotate(-Math.PI/2);
+					rotateContext.drawImage(img,-img.width/2,-img.height/2);
+					rotateContext.restore();
+					rotateContext.save();
+					rotateImageBase64 = rotateCanvas.toDataURL("image/png");
+
+					imgRotated = new Image();
+					imgRotated.width = img.height;
+					imgRotated.height = img.width;
+					imgRotated.src = rotateImageBase64;
+					imgRotated.onload = function(){
+						drawImageToFile(imgRotated);
+					}
 				} else {
-					readDocSignature();
+					drawImageToFile(img);
 				}
 			}
 		}
