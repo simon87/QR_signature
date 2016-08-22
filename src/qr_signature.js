@@ -96,6 +96,7 @@ function qrSignature(){
 				document.getElementById('turn_image').width = window.innerHeight;
 				document.getElementById('take_picture_container').style.display = 'none';
 			} else {
+				loaderContainer = document.getElementById("sk-folding-cube-container");
 				loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
 				loaderContainer.style.height = (window.innerHeight-window.innerHeight/2)+"px";
 				loaderContainer.style.top = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
@@ -119,10 +120,11 @@ function qrSignature(){
 				document.getElementById('take_picture_container').style.display = 'block';
 				document.getElementById('take_picture').height = window.innerWidth-50;
 			} else {
-				loaderContainer.style.width = (window.innerWidth-window.innerWidth/2)+"px";
+				loaderContainer = document.getElementById("sk-folding-cube-container");
+				loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
 				loaderContainer.style.height = (window.innerWidth-window.innerWidth/2)+"px";
 				loaderContainer.style.top = (window.innerWidth-(window.innerWidth-window.innerWidth/2))/2+"px";
-				loaderContainer.style.left = (window.innerWidth-(window.innerWidth-window.innerWidth/2))/2+"px";
+				loaderContainer.style.left = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
 			}
 		}
 	}, false);
@@ -130,6 +132,7 @@ function qrSignature(){
 	 * @FIXME create a new class for the image manipulation functions
 	 */
 	function contrastImage(contextData, contrast) {
+		var start = new Date().getTime();
 		var imageData = contextData.getImageData(0, 0, canvWidth, canvHeight);
 		var data = imageData.data;
 		var factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
@@ -138,10 +141,23 @@ function qrSignature(){
 			data[i] = factor * (data[i] - 128) + 128;
 			data[i+1] = factor * (data[i+1] - 128) + 128;
 			data[i+2] = factor * (data[i+2] - 128) + 128;
+			/*if(data[i] < 167) {
+				data[i] = 0;
+				data[i+1] = 0;
+				data[i+2] = 0;
+			} else {
+				data[i] = 255;
+				data[i+1] = 255;
+				data[i+2] = 255;
+			}*/
 		}
 		contextData.putImageData(imageData, 0, 0);
+		var end = new Date().getTime();
+		var time = end - start;
+		console.log('Contrast time: '+time);
 	}
 	function imageColorCorrection(contextData){
+		var start = new Date().getTime();
 		var imageData = contextData.getImageData(0, 0, canvWidth, canvHeight);
         var data = imageData.data;
 
@@ -152,6 +168,9 @@ function qrSignature(){
           data[i + 2] = brightness;
         }
         contextData.putImageData(imageData, 0, 0);
+		var end = new Date().getTime();
+		var time = end - start;
+		console.log('Color correction time: '+time);
 	}
 	/*Returned with the distance between two coordinates*/
 	function lineDistance( point1, point2){
@@ -360,6 +379,7 @@ function qrSignature(){
 		//document.getElementById('qr-content').innerHTML = '<b>URL:</b>'+url+'<br /><b>Key:</b>'+key;
 	}
 	function createFinalImage(leftSide){
+		var start = new Date().getTime();
 		//alert('final');
 		/*var sourceX = leftSide.x*5;
         var sourceY = leftSide.y*5;
@@ -369,14 +389,15 @@ function qrSignature(){
         var destHeight = leftDownY*5-leftSide.y*5;
         var destX = leftSide.x*5;
         var destY = leftSide.y*5;*/
-		var sourceX = leftSide.x;
+		
+		/*var sourceX = leftSide.x;
         var sourceY = leftSide.y;
         var sourceWidth = origiLeftX-leftSide.x;
         var sourceHeight = leftDownY-leftSide.y;
         var destWidth = origiLeftX-leftSide.x;
         var destHeight = leftDownY-leftSide.y;
         var destX = leftSide.x;
-        var destY = leftSide.y;
+        var destY = leftSide.y;*/
 		
 		var sourceX = leftSide.x;
         var sourceY = leftSide.y;
@@ -405,19 +426,23 @@ function qrSignature(){
        // finalContext.drawImage(originalCanvas, sourceX/canvasRatio, sourceY/canvasRatio, (sourceWidth)/canvasRatio, (sourceHeight)/canvasRatio, 0, 0, (sourceWidth)/saveRatio, (sourceHeight)/saveRatio);
 	   
         finalContext.drawImage(originalCanvas, sourceX*canvasRatio, sourceY*canvasRatio, (sourceWidth)*canvasRatio, (sourceHeight)*canvasRatio, 0, 0, (sourceWidth)*finalRatio, (sourceHeight)*finalRatio);
-        contrastImage(finalContext,80);
-		imageColorCorrection(finalContext);
+        //contrastImage(finalContext,80);
+		//imageColorCorrection(finalContext);
 		finalCanvas.style.display = 'block';
 		finalImageBase64 = finalCanvas.toDataURL("image/png");
+		var end = new Date().getTime();
+		var time = end - start;
+		console.log('Final time: '+time);
 		return finalImageBase64;
 	}
 	function getTheLeftBorder(leftX,leftY) {
-		//alert('left');
+		var start = new Date().getTime();
+
 		returnObj = {};
 		pixColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
 		newColor = pixColor;
 		while(newColor < 100 && leftX > 1) {
-			leftX = leftX-1;
+			leftX = leftX-6; //Teszt, 1-ről
 			//Redefine the newColor
 			newColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
 			//When the image is distorted check the upper-lower pixels color
@@ -441,11 +466,15 @@ function qrSignature(){
 		returnObj.x = leftX;
 		returnObj.y = leftY;
 		returnObj.newColor = newColor;
+		var end = new Date().getTime();
+		var time = end - start;
+		console.log('Left time: '+time);
 		return returnObj;
 		//operationContext.fillRect(leftX,leftY,10,10);
 	}
 	function getTheTopBorder(leftTopX,leftTopY,maxDifference){
 		//alert('top');
+		var start = new Date().getTime();
 		for(var k=0;k<4;k++){
 			pixColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
 			newColor = pixColor;
@@ -491,10 +520,13 @@ function qrSignature(){
 		returnObj.x = leftTopX;
 		returnObj.y = leftTopY;
 		returnObj.newColor = newColor;
+		var end = new Date().getTime();
+		var time = end - start;
+		console.log('Top time: '+time);
 		return returnObj;
 	}
 	function getTheRightBorder(leftTopX,leftTopY,maxDifference){
-		//alert('right');
+		var start = new Date().getTime();
 		for(i=0;i<3;i++){
 			pixColor = operationContext.getImageData(leftTopX, leftTopY, 1, 1).data[0];
 			newColor = pixColor;
@@ -514,6 +546,9 @@ function qrSignature(){
 		returnObj.x = leftTopX;
 		returnObj.y = leftTopY;
 		returnObj.newColor = newColor;
+		var end = new Date().getTime();
+		var time = end - start;
+		console.log('Right time: '+time);
 		return returnObj;
 	}
 	function getTheBottomBorder(leftSideX,leftDownY,newBottomColor){
@@ -556,9 +591,10 @@ function qrSignature(){
 		xhr.send(sendObj);
 	}
 	function cutSignature(leftX,leftY){
-		operationContextData = operationContext.getImageData(0,0,operationCanvas.width,operationCanvas.height).data;
+		var start = new Date().getTime();
 		contrastImage(operationContext,100);
-		imageColorCorrection(operationContext);
+		operationContextData = operationContext.getImageData(0,0,operationCanvas.width,operationCanvas.height).data;
+		//imageColorCorrection(operationContext);
 		maxDifference = 120;
 		topBorder = getTheTopBorder(leftX,leftY,maxDifference);
 
@@ -576,11 +612,19 @@ function qrSignature(){
 		leftSide = getTheLeftBorder(leftX,leftY);
 		leftX = leftSide.x;
 		leftY = leftSide.y;
-
+		
+		/*topratio = origiLeftY-topBorder.y;
+		leftSide = {};
+		leftSide.x = leftX-(topratio*28);
+		//alert(topratio*28);
+		leftSide.y = leftY;
+		leftX = leftSide.x;
+		leftY = leftSide.y;*/
+		
 		//bottomPos = getTheBottomBorder(leftSide.x,leftSide.y,leftSide.newColor);
 		//Test the new method
 		bottomPos = {};
-		bottomPos.y = leftSide.y+((rightBorder.x-leftSide.x)/3);
+		bottomPos.y = leftSide.y+((rightBorder.x-leftSide.x)/4);
 		bottomPos.x = leftSide.x;
 		//return false;
 		leftX = bottomPos.x;
@@ -605,10 +649,13 @@ function qrSignature(){
 		operationContext.lineTo(origiLeftX,leftY);
 		operationContext.strokeStyle="red";
 		operationContext.stroke();
+		var end = new Date().getTime();
+		var time = end - start;
+		console.log('Full cut time: '+time);
 		document.getElementById("sk-folding-cube-container").style.display = 'none';
 		imageData = createFinalImage(leftSide);
 		document.getElementById("qr-canvas").style.display = "none";
-		document.getElementById("rectangle").style.display = "none";
+		//document.getElementById("rectangle").style.display = "none";
 		document.getElementById("original-canvas").style.display = "none";
 		//document.getElementById('status').innerHTML = 'Signature is ready!';
 		sendSignature(imageData);
@@ -618,6 +665,7 @@ function qrSignature(){
 	}
 	/*Rotate to horizontal by the two top markers*/
 	function rotateToHorizontal(){
+		var start = new Date().getTime();
 
 		var pointA = {};
 		var pointB = {};
@@ -708,7 +756,9 @@ function qrSignature(){
 			}
 		}
 		contrastImage(context,100);
-		
+		var end = new Date().getTime();
+		var time = end - start;
+		console.log('Rotate time: '+time);
 		cutSignature(newleftX/canvasRatio,newleftY/canvasRatio);
 	}
 	function checkQr(){
@@ -732,9 +782,13 @@ function qrSignature(){
 			}			
 		}
 		try{
-			//imageColorCorrection(context);
-			//contrastImage(context,30);
+			imageColorCorrection(context);
+			contrastImage(context,30);
+			var start = new Date().getTime();
 			qrcode.decode();
+			var end = new Date().getTime();
+			var time = end - start;
+			console.log('QR read time: '+time);
 		} catch(e){
 			document.getElementById('status').style.color = 'red';
 			document.getElementById('status').innerHTML = 'QR code recognize failed, please try again. Error message:'+e;
@@ -757,8 +811,8 @@ function qrSignature(){
 		}
 	}
 	function checkUserMedia() {
-		/*noUserMedia();
-		return false;*/
+		noUserMedia();
+		return false;
 		navigator.getUserMedia = (navigator.getUserMedia || 
 								 navigator.webkitGetUserMedia || 
 								 navigator.mozGetUserMedia || 
@@ -892,6 +946,7 @@ function qrSignature(){
 	function drawImageToFile(img) {
 		//document.getElementsByTagName('body')[0].innerHTML = '<img src='+img.src+' />';
 		//alert(img.width+', '+img.height);
+		var start = new Date().getTime();
 		canvas.width = img.width;
 		canvas.height = img.height;
 		context.drawImage(img, 0, 0,img.width,img.height);
@@ -924,9 +979,15 @@ function qrSignature(){
 		
 		operationContext.drawImage(canvas, 0, 0,canvas.width/canvasRatio,canvas.height/canvasRatio);
 		document.getElementById("input").style.display = "none";
-
+		var end = new Date().getTime();
+		var time = end - start;
+		console.log('Draw image time: '+time);
 		if(!docQrReaded) {
+			var start = new Date().getTime();
 			checkQr();
+			var end = new Date().getTime();
+			var time = end - start;
+			console.log('Full time: '+time);
 		} else {
 			readDocSignature();
 		}
@@ -940,6 +1001,7 @@ function qrSignature(){
 		document.getElementById("sk-folding-cube-container").style.display = 'block';
 		document.getElementById('take_picture_container').style.display = 'none';
 		document.getElementById('turn_phone').style.display = 'none';
+		
 		reader.onload = function(event) {
 			var img = new Image();
 			img.src = reader.result;
