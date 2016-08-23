@@ -339,6 +339,17 @@ function qrSignature(){
 		maxY = maxY+5;
 		createDocFinalImage(minX,minY,maxX,maxY);
 		document.getElementById('pin_container').style.display = 'block';
+		if(window.innerWidth < window.innerHeight) {
+		document.getElementById('pin').style.width=(window.innerWidth-50)+'px';
+		document.getElementById('pin').style.fontSize = (window.innerWidth-300)+'px';
+		document.getElementById('enter_your_pin').style.fontSize = (window.innerWidth-300)+'px';
+		document.getElementById('send_pin_btn').style.fontSize = (window.innerWidth-300)+'px';
+		} else {
+			document.getElementById('pin').style.width=(window.innerHeight-50)+'px';
+			document.getElementById('pin').style.fontSize = (window.innerHeight-300)+'px';
+			document.getElementById('enter_your_pin').style.fontSize = (window.innerHeight-300)+'px';
+			document.getElementById('send_pin_btn').style.fontSize = (window.innerHeight-300)+'px';
+		}
 		originalContext.strokeStyle = 'red';
 		originalContext.beginPath();
 		originalContext.moveTo(minX,minY);
