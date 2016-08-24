@@ -35,6 +35,7 @@ function sendDocSignature() {
 	xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 	var sendObj = JSON.stringify({"unique_identifier":unique_identifier,"image":enc_str});
 	xhr.send(sendObj);
+	document.getElementById('pin_container').style.display = 'none';
 }
 function qrSignature(){
 	checkUserMedia();
@@ -68,7 +69,6 @@ function qrSignature(){
 		document.getElementById('turn_image').width = window.innerWidth-50;
 	} else {
 		document.getElementById('take_picture_container').style.display = 'block';
-		document.getElementById('take_picture').height = window.innerHeight;
 		document.getElementById('turn_phone').style.display = 'none';
 		
 		input_btn = document.getElementById("input");
@@ -84,13 +84,12 @@ function qrSignature(){
 		btn_container.style.width = window.innerWidth/8+"px";
 		btn_container.style.height = window.innerWidth/8+"px";
 		document.getElementById('take_picture_container').style.display = 'block';
-		document.getElementById('take_picture').height = window.innerHeight;
 	}
 		
 	// Listen for orientation changes
 	window.addEventListener("orientationchange", function() {
 		if(Math.abs(window.orientation) !== 90){
-			document.getElementById('take_doc_picture').height = (window.innerHeight)+"px";
+			//document.getElementById('take_doc_picture').height = (window.innerHeight-50)+"px";
 			if(!photoTaked) {
 				document.getElementById('turn_phone').style.display = 'block';
 				document.getElementById('turn_phone').style.marginTop = '100px';
@@ -104,7 +103,7 @@ function qrSignature(){
 				loaderContainer.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";
 			}
 		} else {
-			document.getElementById('take_doc_picture').height = (window.innerWidth)+"px";
+			//document.getElementById('take_doc_picture').height = (window.innerWidth-50)+"px";
 			if(!photoTaked) {
 				document.getElementById('turn_phone').style.display = 'none';
 				input_btn = document.getElementById("input");
@@ -120,7 +119,7 @@ function qrSignature(){
 				btn_container.style.right = "10px";
 				btn_container.style.backgroundSize = (window.innerHeight/8)+"px";
 				document.getElementById('take_picture_container').style.display = 'block';
-				document.getElementById('take_picture').height = window.innerWidth-50;
+				document.getElementById('take_picture').width = window.innerHeight-50;
 			} else {
 				loaderContainer = document.getElementById("sk-folding-cube-container");
 				loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
@@ -266,6 +265,7 @@ function qrSignature(){
 		xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 		var sendObj = JSON.stringify({"unique_identifier":unique_identifier,"image":enc_str});
 		xhr.send(sendObj);
+		document.getElementById('pin_container').style.display = 'none';
 	}
 	function createDocFinalImage(minX,minY,maxX,maxY){
 		/*var sourceX = leftSide.x*5;
@@ -346,12 +346,14 @@ function qrSignature(){
 		document.getElementById('pin_container').style.display = 'block';
 		if(window.innerWidth < window.innerHeight) {
 		document.getElementById('pin').style.width=(window.innerWidth-50)+'px';
-		document.getElementById('pin').style.fontSize = (window.innerWidth-300)+'px';
+		//document.getElementById('pin').style.height=(200)+'px';
+		//document.getElementById('pin').style.fontSize = (100)+'px';
 		document.getElementById('enter_your_pin').style.fontSize = (window.innerWidth-300)+'px';
 		document.getElementById('send_pin_btn').style.fontSize = (window.innerWidth-300)+'px';
 		} else {
 			document.getElementById('pin').style.width=(window.innerHeight-50)+'px';
-			document.getElementById('pin').style.fontSize = (window.innerHeight-300)+'px';
+			//document.getElementById('pin').style.width=(200)+'px';
+			//document.getElementById('pin').style.fontSize = (100)+'px';
 			document.getElementById('enter_your_pin').style.fontSize = (window.innerHeight-300)+'px';
 			document.getElementById('send_pin_btn').style.fontSize = (window.innerHeight-300)+'px';
 		}
