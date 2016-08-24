@@ -144,15 +144,15 @@ canvas {
     font-size: 800%;
     text-align: center;
     width: 20%;
-	color: #5cb85c;
-	border:4px solid #5cb85c;
+	color: #5c87b8;
+	border:4px solid #5c87b8;
 }
 #enter_your_pin {
-	color: #5cb85c;
+	color: #5c87b8;
 	font-family:Verdana;
 }
 #send_pin_btn {
-	background-color:#5cb85c;
+	background-color:#5c87b8;
 	color:#FFF;
 	font-family:Verdana;
 }

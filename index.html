@@ -26,7 +26,7 @@
 		<script type="text/javascript" src="src/3rd_party/rijndael/mcrypt.js"></script>
 		<script type="text/javascript" src="src/3rd_party/rijndael/core.js"></script>
 		<script type="text/javascript" src="src/3rd_party/rijndael/md5-min.js"></script>
-		<script type="text/javascript" src="src/qr_signature.js?ver=0.110"></script>
+		<script type="text/javascript" src="src/qr_signature.js?ver=0.113"></script>
 		<link rel="manifest" href="src/manifest.json">
 	</head>
 	<body>
@@ -44,6 +44,9 @@
 		<span id='enter_your_pin'>Please enter your pin</span><br />
 		<input type="password" maxlength="4" id="pin" onkeyup="checkPinPass();" /><br />
 		<button id="send_pin_btn" onclick="sendDocSignature()" disabled="true">SEND</button>
+	</div>
+	<div id="doc_take_picture_container" style="height:100%;position:fixed;top:0;left:0;display:none;">
+		<img id="take_doc_picture" src="images/doc_take_picture.png">
 	</div>
 	<div id="take_picture_container" style="height:100%;position:fixed;top:0;left:0;display:none;">
 		<img id="take_picture" src="images/take_picture.png">

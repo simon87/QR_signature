@@ -9,7 +9,7 @@ function checkPinPass(){
 		document.getElementById('send_pin_btn').disabled = true;
 	}
 }
-
+var docMode = false;
 var finalDocImageBase64;
 var cryptKey;
 var unique_identifier;
@@ -90,6 +90,7 @@ function qrSignature(){
 	// Listen for orientation changes
 	window.addEventListener("orientationchange", function() {
 		if(Math.abs(window.orientation) !== 90){
+			document.getElementById('take_doc_picture').height = (window.innerHeight)+"px";
 			if(!photoTaked) {
 				document.getElementById('turn_phone').style.display = 'block';
 				document.getElementById('turn_phone').style.marginTop = '100px';
@@ -103,6 +104,7 @@ function qrSignature(){
 				loaderContainer.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";
 			}
 		} else {
+			document.getElementById('take_doc_picture').height = (window.innerWidth)+"px";
 			if(!photoTaked) {
 				document.getElementById('turn_phone').style.display = 'none';
 				input_btn = document.getElementById("input");
@@ -290,6 +292,7 @@ function qrSignature(){
         finalCanvas.width = sourceWidth*finalRatio;
         finalCanvas.height = sourceHeight*finalRatio;
         finalCanvas.style.position = "absolute";
+        finalCanvas.style.border = "4px solid #5c87b8";
         finalContext = finalCanvas.getContext('2d');
         var body = document.getElementsByTagName("body")[0];
         body.appendChild(finalCanvas);
@@ -303,6 +306,8 @@ function qrSignature(){
 	function takeDocSignPicture() {
 		document.getElementById("input").style.display = "block";
 		document.getElementById("file_button").style.display = 'block';
+		document.getElementById('doc_take_picture_container').style.display = 'block';
+		document.getElementById('take_doc_picture').height = window.innerHeight;
 		document.getElementById("original-canvas").style.display = 'none';
 	}
 	function readDocSignature(){
@@ -709,6 +714,14 @@ function qrSignature(){
 		rotationDegree = Math.asin(sideA/sideC) * 180/Math.PI;
 		//alert(rotationDegree); //0.71
 		/*Let's draw the rotated frame*/
+
+		/*Rotate and save the original image for the final operations*/
+		originalContext.save();
+		originalContext.translate(canvas.width/2,canvas.height/2);
+		originalContext.rotate(rotationDir*rotationDegree*Math.PI/180);
+		originalContext.drawImage(originalCanvas,-canvas.width/2,-canvas.height/2);
+		originalContext.restore();
+		
 		operationContext.clearRect(0, 0, canvWidth, canvHeight);
 		operationContext.save();
 		operationContext.translate(canvas.width/2,canvas.height/2);
@@ -719,12 +732,6 @@ function qrSignature(){
 		//operationContext.drawImage(canvas,-canvas.width/2,-canvas.height/2); //itt kell kicsinyíteni - próba
 		operationContext.drawImage(originalCanvas, 0, 0,canvas.width/canvasRatio,canvas.height/canvasRatio);
 		operationContext.restore();
-		/*Rotate and save the original image for the final operations*/
-		originalContext.save();
-		originalContext.translate(canvas.width/2,canvas.height/2);
-		originalContext.rotate(rotationDir*rotationDegree*Math.PI/180);
-		originalContext.drawImage(originalCanvas,-canvas.width/2,-canvas.height/2);
-		originalContext.restore();
 		
 		/*creating the "blue"*/
 		
@@ -779,15 +786,18 @@ function qrSignature(){
 				qrCodeIsReady = true;
 				if(!docSign) {
 					document.getElementById('status').style.color = '#5cb85c';
-					document.getElementById('status').innerHTML = 'Signature sended!';
+					document.getElementById('status').innerHTML = 'Signature has been sent!';
 					imageColorCorrection(context); //Test
 					rotateToHorizontal();
 				} else {
 					//Doktor mód
 					document.getElementById("sk-folding-cube-container").style.display = 'none';
 					document.getElementById('status').style.color = '#5cb85c';
-					document.getElementById('status').innerHTML = 'Please take a picture of your signature.';
+					
+					//document.getElementById('status').innerHTML = 'Please take a picture of your signature.';
+					document.getElementById('status').innerHTML = '';
 					docQrReaded = true;
+					docMode = true;
 					takeDocSignPicture();
 				}
 			}			
@@ -1009,6 +1019,7 @@ function qrSignature(){
 		var context = canvas.getContext("2d");
 		var reader = new FileReader;
 		document.getElementById("file_button").style.display = 'none';
+		document.getElementById('doc_take_picture_container').style.display = 'none';
 		document.getElementById("sk-folding-cube-container").style.display = 'block';
 		document.getElementById('take_picture_container').style.display = 'none';
 		document.getElementById('turn_phone').style.display = 'none';
