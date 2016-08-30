@@ -212,7 +212,7 @@ function qrSignature(){
 		imageData = operationContextData;
 		if(direction == 'left') {
 			leftX = leftX-1;
-			for(var i=5;i>0;i--) {
+			for(var i=3;i>0;i--) {
 				if(getImageDataByCords(imageData,leftX-i,leftY).r < 100) {
 					return true;
 				}
@@ -220,7 +220,7 @@ function qrSignature(){
 			return false;
 		} else if(direction == 'bottom') {
 			leftY = leftY+1;
-			for(var i=1;i<6;i++) {
+			for(var i=1;i<3;i++) {
 				if(getImageDataByCords(imageData,leftX,leftY+i).r < 100) {
 					return true;
 				}
@@ -228,7 +228,7 @@ function qrSignature(){
 			return false;
 		} else if(direction == 'topBlack') {
 			leftY = leftY-1;
-			for(var i=1;i<5;i++) {
+			for(var i=1;i<3;i++) {
 				if(getImageDataByCords(imageData,leftX,leftY-i).r < 100) {
 					return true;
 				}
@@ -236,7 +236,7 @@ function qrSignature(){
 			return false;
 		} else if(direction == 'topWhite') {
 			leftY = leftY-1;
-			for(var i=1;i<5;i++) {
+			for(var i=1;i<3;i++) {
 				if(getImageDataByCords(imageData,leftX,leftY-i).r > 100) {
 					return true;
 				}
@@ -429,7 +429,7 @@ function qrSignature(){
         var finalCanvas = document.createElement('canvas');
 		//var finalRatio = 300/(sourceWidth);
 		var finalRatio = 300/(sourceWidth);
-		var saveRatio = ((sourceWidth)*canvasRatio)/1024;
+		var saveRatio = ((sourceWidth)*canvasRatio)/1280;
         finalCanvas.id = "final-canvas";
         finalCanvas.width = (sourceWidth)*finalRatio;
         finalCanvas.height = (sourceHeight)*finalRatio;
@@ -967,37 +967,22 @@ function qrSignature(){
 		setTimeout(function(){loadFile(e); }, 500);
 	}
 	function drawImageToFile(img) {
-		//document.getElementsByTagName('body')[0].innerHTML = '<img src='+img.src+' />';
-		//alert(img.width+', '+img.height);
 		var start = new Date().getTime();
-		canvas.width = img.width;
-		canvas.height = img.height;
-		context.drawImage(img, 0, 0,img.width,img.height);
-		/*if(img.width < img.height) {
-			canvas.width = img.height;
-			canvas.height = img.width;
-			context.translate(canvas.width/2,canvas.height/2);
-			context.rotate(-Math.PI/2);
-			context.drawImage(img,-img.width/2,-img.height/2);
-			context.translate(-canvas.width/2,-canvas.height/2);
-			context.restore();
-			context.save();
-		}*/
+		canvasRatio = img.width/1280;
+		canvas.width = img.width/canvasRatio;
+		canvas.height = img.height/canvasRatio;
+		
+		context.drawImage(img, 0, 0,img.width/canvasRatio,img.height/canvasRatio);
+		canvasRatio = 1;
 		
 		document.getElementById('status').innerHTML = 'Image loaded!';
 		canvWidth = canvas.width;
 		canvHeight = canvas.height;
-		canvasRatio = canvWidth/1024;
+		
 		originalCanvas.width = canvas.width;
 		originalCanvas.height = canvas.height;
 		operationCanvas.width = canvas.width/canvasRatio;
 		operationCanvas.height = canvas.height/canvasRatio;
-		/*canvas.width = img.width;
-		canvas.height = img.height;
-		originalCanvas.width = img.width;
-		originalCanvas.height = img.height;
-		operationCanvas.width = img.width;
-		operationCanvas.height = img.height;*/
 		originalContext.drawImage(canvas, 0, 0);
 		
 		operationContext.drawImage(canvas, 0, 0,canvas.width/canvasRatio,canvas.height/canvasRatio);
