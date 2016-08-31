@@ -97,10 +97,10 @@ function qrSignature(){
 				document.getElementById('take_picture_container').style.display = 'none';
 			} else {
 				loaderContainer = document.getElementById("sk-folding-cube-container");
-				loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
+				/*loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
 				loaderContainer.style.height = (window.innerHeight-window.innerHeight/2)+"px";
 				loaderContainer.style.top = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
-				loaderContainer.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";
+				loaderContainer.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";*/
 			}
 		} else {
 			//document.getElementById('take_doc_picture').height = (window.innerWidth-50)+"px";
@@ -121,11 +121,11 @@ function qrSignature(){
 				document.getElementById('take_picture_container').style.display = 'block';
 				document.getElementById('take_picture').width = window.innerHeight-50;
 			} else {
-				loaderContainer = document.getElementById("sk-folding-cube-container");
+				/*loaderContainer = document.getElementById("sk-folding-cube-container");
 				loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
 				loaderContainer.style.height = (window.innerWidth-window.innerWidth/2)+"px";
 				loaderContainer.style.top = (window.innerWidth-(window.innerWidth-window.innerWidth/2))/2+"px";
-				loaderContainer.style.left = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
+				loaderContainer.style.left = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";*/
 			}
 		}
 	}, false);
@@ -156,6 +156,23 @@ function qrSignature(){
 		var end = new Date().getTime();
 		var time = end - start;
 		console.log('Contrast time: '+time);
+	}
+	function brutalBW(contextData) {
+		var imageData = contextData.getImageData(0, 0, canvWidth, canvHeight);
+		var data = imageData.data;
+		for(var i=0;i<data.length;i+=4)
+		{
+			if(data[i] < 180) {
+				data[i] = 0;
+				data[i+1] = 0;
+				data[i+2] = 0;
+			} else {
+				data[i] = 255;
+				data[i+1] = 255;
+				data[i+2] = 255;
+			}
+		}
+		contextData.putImageData(imageData, 0, 0);
 	}
 	function imageColorCorrection(contextData){
 		var start = new Date().getTime();
@@ -212,7 +229,7 @@ function qrSignature(){
 		imageData = operationContextData;
 		if(direction == 'left') {
 			leftX = leftX-1;
-			for(var i=3;i>0;i--) {
+			for(var i=1;i>0;i--) {
 				if(getImageDataByCords(imageData,leftX-i,leftY).r < 100) {
 					return true;
 				}
@@ -220,7 +237,7 @@ function qrSignature(){
 			return false;
 		} else if(direction == 'bottom') {
 			leftY = leftY+1;
-			for(var i=1;i<3;i++) {
+			for(var i=1;i<2;i++) {
 				if(getImageDataByCords(imageData,leftX,leftY+i).r < 100) {
 					return true;
 				}
@@ -228,7 +245,7 @@ function qrSignature(){
 			return false;
 		} else if(direction == 'topBlack') {
 			leftY = leftY-1;
-			for(var i=1;i<3;i++) {
+			for(var i=1;i<2;i++) {
 				if(getImageDataByCords(imageData,leftX,leftY-i).r < 100) {
 					return true;
 				}
@@ -236,7 +253,7 @@ function qrSignature(){
 			return false;
 		} else if(direction == 'topWhite') {
 			leftY = leftY-1;
-			for(var i=1;i<3;i++) {
+			for(var i=1;i<2;i++) {
 				if(getImageDataByCords(imageData,leftX,leftY-i).r > 100) {
 					return true;
 				}
@@ -611,8 +628,9 @@ function qrSignature(){
 	function cutSignature(leftX,leftY){
 		var start = new Date().getTime();
 		contrastImage(operationContext,100);
+		//brutalBW(operationContext);
 		operationContextData = operationContext.getImageData(0,0,operationCanvas.width,operationCanvas.height).data;
-		//imageColorCorrection(operationContext);
+		imageColorCorrection(operationContext);
 		maxDifference = 120;
 		topBorder = getTheTopBorder(leftX,leftY,maxDifference);
 
@@ -805,8 +823,8 @@ function qrSignature(){
 			}			
 		}
 		try{
-			imageColorCorrection(context);
-			contrastImage(context,30);
+			//imageColorCorrection(context);
+			contrastImage(context,100);
 			var start = new Date().getTime();
 			qrcode.decode();
 			var end = new Date().getTime();
@@ -954,10 +972,10 @@ function qrSignature(){
 		btn_container.style.backgroundSize = (window.innerHeight-window.innerHeight/2)+"px";*/
 		document.getElementById("input").style.display = "block";
 		loaderContainer = document.getElementById("sk-folding-cube-container");
-		loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
+		/*loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
 		loaderContainer.style.height = (window.innerHeight-window.innerHeight/2)+"px";
 		loaderContainer.style.top = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
-		loaderContainer.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";
+		loaderContainer.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";*/
 	}
 	function handleFile(e) {
 		photoTaked = true;
