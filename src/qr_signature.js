@@ -57,46 +57,84 @@ function qrSignature(){
 	var qrCodeIsReady = false;
 	var canvasRatio;
 
+	var QRRatio;
 	cryptKey = '';
 	
 	var docSign = false;
 	var docQrReaded = false;
 
 	var photoTaked = false;
+	/*Correct width and height*/
+	if(window.innerWidth > window.innerHeight) {
+		strait = window.innerHeight;
+		longer = window.innerWidth;
+	} else {
+		strait = window.innerWidth;
+		longer = window.innerHeight;
+	}
 	if(Math.abs(window.orientation) !== 90){
 		document.getElementById('turn_phone').style.display = 'block';
 		document.getElementById('turn_phone').style.marginTop = '100px';
-		document.getElementById('turn_image').width = window.innerWidth-50;
+		document.getElementById('turn_image').width = strait-50;
+		document.getElementById('turn_image').height = (strait-50)*0.79;
+		//document.getElementById('turn_image').removeAttribute('height');
+		//alert(document.getElementById('turn_image').height);
+
 	} else {
 		document.getElementById('take_picture_container').style.display = 'block';
 		document.getElementById('turn_phone').style.display = 'none';
 		
 		input_btn = document.getElementById("input");
-		input_btn.style.height = window.innerHeight/8+"px";
-		input_btn.style.width = window.innerHeight/8+"px";
-		input_btn.style.backgroundSize = "\""+(window.innerHeight/8)+"px\"";
+		input_btn.style.height = longer/8+"px";
+		input_btn.style.width = longer/8+"px";
+		input_btn.style.backgroundSize = "\""+(longer/8)+"px\"";
 		
 		btn_container = document.getElementById("file_button");
 		btn_container.style.display = "block";
-		btn_container.style.top = (window.innerHeight-window.innerHeight/8)/2+"px";
+		btn_container.style.top = ((strait)/2-(longer/8/2))+"px";
 		btn_container.style.right = "10px";
-		btn_container.style.backgroundSize = (window.innerHeight/8)+"px";
-		btn_container.style.width = window.innerWidth/8+"px";
-		btn_container.style.height = window.innerWidth/8+"px";
+		btn_container.style.backgroundSize = (longer/8)+"px";
+		btn_container.style.width = longer/8+"px";
+		btn_container.style.height = longer/8+"px";
+		takePicContainer = document.getElementById('take_picture_container');
+		takePicContainer.style.width = strait+'px';
+
+		takePicImg = document.getElementById('take_picture');
+		takePicImg.height = strait;
 		document.getElementById('take_picture_container').style.display = 'block';
 	}
 		
 	// Listen for orientation changes
 	window.addEventListener("orientationchange", function() {
+		setTimeout(function(){
+			
+			/*Correct width and height*/
+		//var ratio = window.devicePixelRatio || 1;
+		var screenWidth = window.screen.width;
+		var screenHeight = window.screen.height;
+		//alert(screenWidth+'*'+screenHeight);
+		if(screenWidth > screenHeight) {
+			strait = screenHeight;
+			longer = screenWidth;//FF640*287 360*567 chrome:640*279 360*559 (outer - inner) 
+		} else {
+			strait = screenWidth;
+			longer = screenHeight;
+		}
+		strait = screenWidth;
+		longer = screenHeight;
 		if(Math.abs(window.orientation) !== 90){
 			//document.getElementById('take_doc_picture').height = (window.innerHeight-50)+"px";
 			if(!photoTaked) {
 				document.getElementById('turn_phone').style.display = 'block';
 				document.getElementById('turn_phone').style.marginTop = '100px';
-				document.getElementById('turn_image').width = window.innerHeight;
+				document.getElementById('turn_image').height = strait-50;
+				document.getElementById('turn_image').width = (strait-50)*1.261;
+				//document.getElementById('turn_image').removeAttribute('width');
+				//alert(document.getElementById('turn_image').width);
 				document.getElementById('take_picture_container').style.display = 'none';
+				document.getElementById("file_button").style.display = 'none';
 			} else {
-				loaderContainer = document.getElementById("sk-folding-cube-container");
+				//loaderContainer = document.getElementById("sk-folding-cube-container");
 				/*loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
 				loaderContainer.style.height = (window.innerHeight-window.innerHeight/2)+"px";
 				loaderContainer.style.top = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
@@ -105,21 +143,28 @@ function qrSignature(){
 		} else {
 			//document.getElementById('take_doc_picture').height = (window.innerWidth-50)+"px";
 			if(!photoTaked) {
+				document.getElementById('take_picture_container').style.display = 'block';
 				document.getElementById('turn_phone').style.display = 'none';
+				
 				input_btn = document.getElementById("input");
-				input_btn.style.width = (window.innerHeight/8)+"px";
-				input_btn.style.height = (window.innerHeight/8)+"px";
-				input_btn.style.backgroundSize = "\""+(window.innerHeight/8)+"px\"";
+				input_btn.style.height = strait/8+"px";
+				input_btn.style.width = strait/8+"px";
+				input_btn.style.backgroundSize = "\""+(strait/8)+"px\"";
 				
 				btn_container = document.getElementById("file_button");
-				btn_container.style.width = window.innerHeight/8+"px";
-				btn_container.style.height = window.innerHeight/8+"px";
 				btn_container.style.display = "block";
-				btn_container.style.top =(window.innerWidth-(window.innerWidth/10))/2+"px";
+				btn_container.style.top = (100)+"px";
 				btn_container.style.right = "10px";
-				btn_container.style.backgroundSize = (window.innerHeight/8)+"px";
+				btn_container.style.backgroundSize = (strait/8)+"px";
+				btn_container.style.width = strait/8+"px";
+				btn_container.style.height = strait/8+"px";
+				takePicContainer = document.getElementById('take_picture_container');
+				takePicContainer.style.width = longer+'px';
+
+				takePicImg = document.getElementById('take_picture');
+				takePicImg.width = strait;
 				document.getElementById('take_picture_container').style.display = 'block';
-				document.getElementById('take_picture').width = window.innerHeight-50;
+				
 			} else {
 				/*loaderContainer = document.getElementById("sk-folding-cube-container");
 				loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
@@ -128,6 +173,8 @@ function qrSignature(){
 				loaderContainer.style.left = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";*/
 			}
 		}
+		},500);
+		
 	}, false);
 	/**
 	 * @FIXME create a new class for the image manipulation functions
@@ -471,9 +518,14 @@ function qrSignature(){
 		return finalImageBase64;
 	}
 	function getTheLeftBorder(leftX,leftY) {
+		 //4.813 - left 3.306 - bottom
+		
 		var start = new Date().getTime();
 
 		returnObj = {};
+		returnObj.x = leftX-(QRRatio*4.813);
+		returnObj.y = leftY;
+		return returnObj;
 		pixColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
 		newColor = pixColor;
 		while(newColor < 100 && leftX > 1) {
@@ -587,9 +639,10 @@ function qrSignature(){
 		return returnObj;
 	}
 	function getTheBottomBorder(leftSideX,leftDownY,newBottomColor){
+		// 4.813 - left 3.306 - bottom
 		//alert('bottom');
 		returnObj = {};
-		pixColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
+		/*pixColor = operationContext.getImageData(leftSideX, leftDownY, 1, 1).data[0];
 		newBottomColor = pixColor;
 		while(newBottomColor < 150 && leftDownY < operationCanvas.height) {
 			leftDownY+=1;
@@ -607,10 +660,12 @@ function qrSignature(){
 			if(pixelTolarence(leftSideX,leftDownY,'bottom')) {
 				newBottomColor = 99;
 			}
-		}
+		}*/
+		leftDownY = QRRatio*3.306;
 		leftDownY -= 2;
 		returnObj.x = leftSideX;
 		returnObj.y = leftDownY;
+		alert(leftDownY);
 		return returnObj;
 	}
 	function sendSignature(imgData) {
@@ -660,7 +715,8 @@ function qrSignature(){
 		//bottomPos = getTheBottomBorder(leftSide.x,leftSide.y,leftSide.newColor);
 		//Test the new method
 		bottomPos = {};
-		bottomPos.y = leftSide.y+((rightBorder.x-leftSide.x)/4);
+		bottomPos.y = QRRatio*3.306;
+		//bottomPos.y = leftSide.y+((rightBorder.x-leftSide.x)/4);
 		bottomPos.x = leftSide.x;
 		//return false;
 		leftX = bottomPos.x;
@@ -702,7 +758,7 @@ function qrSignature(){
 	/*Rotate to horizontal by the two top markers*/
 	function rotateToHorizontal(){
 		var start = new Date().getTime();
-
+		
 		var pointA = {};
 		var pointB = {};
 		var lastPatternIndex = qrcode.patternPos.length-1;
@@ -714,7 +770,7 @@ function qrSignature(){
 		pointB.x = qrcode.patternPos[lastPatternIndex][2].x;
 		pointB.y = qrcode.patternPos[lastPatternIndex][2].y;
 		sideA = lineDistance(pointA,pointB);
-
+		QRRatio = (qrcode.patternPos[lastPatternIndex][2].x-qrcode.patternPos[lastPatternIndex][1].x);
 		pointA.x = qrcode.patternPos[lastPatternIndex][1].x;
 		pointA.y = qrcode.patternPos[lastPatternIndex][1].y;
 		pointB.x = qrcode.patternPos[lastPatternIndex][2].x;
@@ -1028,13 +1084,13 @@ function qrSignature(){
 		document.getElementById("sk-folding-cube-container").style.display = 'block';
 		document.getElementById('take_picture_container').style.display = 'none';
 		document.getElementById('turn_phone').style.display = 'none';
-		
-		reader.onload = function(event) {
+		setTimeout(function(){		reader.onload = function(event) {
 			var img = new Image();
 			img.src = reader.result;
 			img.onload = function () {
 				/*When the image is rotated*/
-				if(img.width < img.height) {
+				drawImageToFile(img);
+				/*if(img.width < img.height) {
 					var rotateCanvas = document.createElement('canvas');
 					rotateCanvas.id = "rotateCanvas";
 					rotateCanvas.width = img.height;
@@ -1060,10 +1116,10 @@ function qrSignature(){
 					}
 				} else {
 					drawImageToFile(img);
-				}
+				}*/
 			}
 		}
-		reader.readAsDataURL(e.target.files[0]);
+		reader.readAsDataURL(e.target.files[0]);}, 500);
 	}
 	/*******TEST*********/
 	  function findPos(obj) {
