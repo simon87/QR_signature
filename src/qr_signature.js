@@ -13,7 +13,7 @@ var docMode = false;
 var finalDocImageBase64;
 var cryptKey;
 var unique_identifier;
-var signatureUrl = 'http://dev-api.acrossopeneyes.com/signatures';
+//var signatureUrl = 'http://dev-api.acrossopeneyes.com/signatures';
 //var signatureUrl = 'http://127.0.0.1/qr_signature_heroku/peaceful-lowlands-44823/web/ajax.php';
 function sendDocSignature() {
 	//Encrypt
@@ -393,7 +393,7 @@ function qrSignature(){
 		var maxX = 0;
 		var maxY = 0;
 		for (var i = 0; i<pix.length; i+=4) {
-			if(pix[i] < 20){
+			if(pix[i] < 10){
 				pointX = (i / 4)%canvWidth;
 				pointY = Math.floor((i / 4)/canvWidth);
 				if(pointX<minX) {
@@ -766,7 +766,7 @@ function qrSignature(){
 	/*Rotate to horizontal by the two top markers*/
 	function rotateToHorizontal(){
 		var start = new Date().getTime();
-		
+		console.log(qrcode.patternPos);
 		var pointA = {};
 		var pointB = {};
 		var lastPatternIndex = qrcode.patternPos.length-1;
@@ -821,6 +821,8 @@ function qrSignature(){
 		
 		context.fillStyle = 'blue';
 		context.fillRect( qrcode.patternPos[lastPatternIndex][1].x, qrcode.patternPos[lastPatternIndex][1].y, 2, 2);
+		context.fillStyle = 'red';
+		context.fillRect( qrcode.patternPos[lastPatternIndex][2].x, qrcode.patternPos[lastPatternIndex][2].y, 2, 2);
 		//context.save();
 		context.translate(canvas.width/2,canvas.height/2);
 		context.rotate(rotationDir*rotationDegree*Math.PI/180);
@@ -871,6 +873,7 @@ function qrSignature(){
 				if(!docSign) {
 					document.getElementById('status').style.color = '#5cb85c';
 					document.getElementById('status').innerHTML = 'Signature has been sent!';
+					document.getElementById("rectangle").style.display = 'none';
 					imageColorCorrection(context); //Test
 					rotateToHorizontal();
 				} else {
@@ -895,11 +898,10 @@ function qrSignature(){
 			var time = end - start;
 			console.log('QR read time: '+time);
 		} catch(e){
-			document.getElementById('status').style.color = 'red';
-			document.getElementById('status').innerHTML = 'QR code recognize failed, please try again. Error message:'+e;
-			photoTaked = false;
-
-			if(cameraMode) {
+			if(isMobileBrowser()) {
+				document.getElementById('status').style.color = 'red';
+				document.getElementById('status').innerHTML = 'QR code recognize failed, please try again. Error message:'+e;
+				photoTaked = false;
 				document.getElementById("file_button").style.display = 'block';
 				document.getElementById("input").style.display = 'block';
 				document.getElementById("take_picture_container").style.display = 'block';
@@ -926,14 +928,13 @@ function qrSignature(){
 			noUserMedia();
 			return false;
 		}
-		
+		cameraMode = true;
 		navigator.getUserMedia = (navigator.getUserMedia || 
 								 navigator.webkitGetUserMedia || 
 								 navigator.mozGetUserMedia || 
 								 navigator.msGetUserMedia);
 		//navigator.getUserMedia = false;
 		if (navigator.getUserMedia) {
-			cameraMode = true;
 			//Request access to video only
 			navigator.getUserMedia(
 			{
@@ -948,6 +949,7 @@ function qrSignature(){
 					document.getElementById('qr-canvas').style.display = 'block';
 				},
 				function(error) {
+					console.log(error);
 					alert('Something went wrong. (error code ' + error.code + ')');
 				}
 			);
