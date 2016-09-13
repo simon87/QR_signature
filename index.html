@@ -2,7 +2,9 @@
 <html>
 	<head>
 		<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400" rel="stylesheet">
 		<link rel="stylesheet" type="text/css" href="styles/style.css">
+		<link rel="stylesheet" type="text/css" href="styles/bootstrap.min.css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 		<script type="text/javascript" src="src/3rd_party/grid.js"></script>
 		<script type="text/javascript" src="src/3rd_party/version.js"></script>
@@ -27,7 +29,7 @@
 		<script type="text/javascript" src="src/3rd_party/rijndael/core.js"></script>
 		<script type="text/javascript" src="src/3rd_party/rijndael/md5-min.js"></script>
 		<script type="text/javascript" src="src/config/config.js"></script>
-		<script type="text/javascript" src="src/qr_signature.js?ver=0.172"></script>
+		<script type="text/javascript" src="src/qr_signature.js?ver=0.138"></script>
 		<link rel="manifest" href="src/manifest.json">
 	</head>
 	<body>
@@ -39,7 +41,7 @@
 		<div class="sk-cube3 sk-cube"></div>
 	</div>-->
 	<video style="display:none;" id='video'></video>
-	<img src="images/loader.gif" class="ri" id="sk-folding-cube-container" style="display:none" />
+	<img src="images/loader.gif" class="ri img-responsive center-block" id="sk-folding-cube-container" style="display:none" />
 	<canvas id='original-canvas' style="display:none;"></canvas>
 	<canvas id='qr-canvas' style="display:none;"></canvas>
 	<div id='rectangle'></div>
@@ -50,14 +52,28 @@
 		<button id="send_pin_btn" onclick="sendDocSignature()" disabled="true">SEND</button>
 	</div>
 	<div id="doc_take_picture_container" style="height:100%;position:fixed;top:0;left:0;display:none;">
-		<img id="take_doc_picture" src="images/doc_take_picture.png">
+		<img id="take_doc_picture" src="images/doc_take_picture.png" class="img-responsive center-block">
 	</div>
 	<div id="take_picture_container" style="height:100%;position:fixed;top:0;left:0;display:none;">
-		<img id="take_picture" src="images/take_picture.png">
+		<img id="take_picture" src="images/take_picture.png" class="img-responsive center-block">
 	</div>
-	<div id="file_button" class="file_button_container" style="display:none;"><input type="file" id="input" name="input" accept="image/*" capture="camera"></input></div>
-	<div id="turn_phone" style="position:fixed;top:0px;left:1px;display:none;background-color:#FFF;text-align:center;">
-		<img id="turn_image" src="images/rotate_yourn_phone.png" />
+	
+	<div id="browser_mode" style="display:none;margin-top:100px;">
+		<p class="text-center" style="font-size:3em;color:#5cb85c;">Please upload the first, signed page of the certificate.</p>
+		<div id="file_button_browser" class="file_button_browser_container center-block" ><input type="file" id="input_browser" name="input_browser" accept="image/*" ></input></div>
+	</div>
+	<div id="take_pic_of_qr" style="position:fixed;top:0px;left:1px;display:none;background-color:#FFF;text-align:center;width:100%;margin-top:30px;">
+		<p class="text-center" style="font-size:3em;color:#5c87b8;">Please take a picture of your personal QR code.</p>
+		<img id="turn_image" src="images/doc_take_signature_picture_wo_text.png" class="img-responsive center-block" />
+
+			<div id="file_button" class="file_button_container center-block" style="text-align:center;">
+				<input type="file" id="input" name="input" accept="image/*" capture="camera"></input>
+			</div>
+		
+	</div>
+	<div id="turn_phone" style="position:fixed;top:0px;left:1px;display:none;background-color:#FFF;text-align:center;width:100%;margin-top:30px;">
+		<p class="text-center" style="font-size:3em;color:#5cb85c;">Please rotate your phone horizontally.</p>
+		<img id="turn_image" src="images/rotate_yourn_phone_wo_text.png" class="img-responsive center-block" />
 	</div>
 	<div id='status' style='position:fixed;top:0;left:0;font-family:Verdana;text-align:center;'></div>
 	<script>

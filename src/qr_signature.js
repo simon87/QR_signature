@@ -80,10 +80,11 @@ function qrSignature(){
 	}
 	if(Math.abs(window.orientation) !== 90){
 		if(isMobileBrowser()) {
-			document.getElementById('turn_phone').style.display = 'block';
-			document.getElementById('turn_phone').style.marginTop = '100px';
-			document.getElementById('turn_image').width = strait-50;
-			document.getElementById('turn_image').height = (strait-50)*0.79;
+			//document.getElementById('turn_phone').style.display = 'block';
+			document.getElementById('take_pic_of_qr').style.display = 'block';
+			//document.getElementById('turn_phone').style.marginTop = '100px';
+			/*document.getElementById('turn_image').width = strait-50;
+			document.getElementById('turn_image').height = (strait-50)*0.79;*/
 		}
 		//document.getElementById('turn_image').removeAttribute('height');
 		//alert(document.getElementById('turn_image').height);
@@ -98,12 +99,12 @@ function qrSignature(){
 		input_btn.style.backgroundSize = "\""+(longer/8)+"px\"";
 		
 		btn_container = document.getElementById("file_button");
-		btn_container.style.display = "block";
+		/*btn_container.style.display = "block";
 		btn_container.style.top = ((strait)/2-(longer/8/2))+"px";
 		btn_container.style.right = "10px";
 		btn_container.style.backgroundSize = (longer/8)+"px";
 		btn_container.style.width = longer/8+"px";
-		btn_container.style.height = longer/8+"px";
+		btn_container.style.height = longer/8+"px";*/
 		takePicContainer = document.getElementById('take_picture_container');
 		takePicContainer.style.width = strait+'px';
 
@@ -133,15 +134,16 @@ function qrSignature(){
 		if(Math.abs(window.orientation) !== 90){
 			//document.getElementById('take_doc_picture').height = (window.innerHeight-50)+"px";
 			if(!photoTaked) {
-				document.getElementById('turn_phone').style.display = 'block';
-				document.getElementById('turn_phone').style.marginTop = '100px';
-				document.getElementById('turn_image').height = strait-50;
-				document.getElementById('turn_image').width = (strait-50)*1.261;
+				//document.getElementById('turn_phone').style.display = 'block';
+				//document.getElementById('turn_phone').style.marginTop = '100px';
+				/*document.getElementById('turn_image').height = strait-50;
+				document.getElementById('turn_image').width = (strait-50)*1.261;*/
 				//document.getElementById('turn_image').removeAttribute('width');
 				//alert(document.getElementById('turn_image').width);
 				document.getElementById('take_picture_container').style.display = 'none';
-				document.getElementById("file_button").style.display = 'none';
+				//document.getElementById("file_button").style.display = 'none';
 			} else {
+				document.getElementById('turn_phone').style.display = 'block';
 				//loaderContainer = document.getElementById("sk-folding-cube-container");
 				/*loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
 				loaderContainer.style.height = (window.innerHeight-window.innerHeight/2)+"px";
@@ -151,6 +153,7 @@ function qrSignature(){
 		} else {
 			//document.getElementById('take_doc_picture').height = (window.innerWidth-50)+"px";
 			if(!photoTaked) {
+				return false;
 				document.getElementById('take_picture_container').style.display = 'block';
 				document.getElementById('turn_phone').style.display = 'none';
 				
@@ -161,11 +164,11 @@ function qrSignature(){
 				
 				btn_container = document.getElementById("file_button");
 				btn_container.style.display = "block";
-				btn_container.style.top = (100)+"px";
+				/*btn_container.style.top = (100)+"px";
 				btn_container.style.right = "10px";
 				btn_container.style.backgroundSize = (strait/8)+"px";
 				btn_container.style.width = strait/8+"px";
-				btn_container.style.height = strait/8+"px";
+				btn_container.style.height = strait/8+"px";*/
 				takePicContainer = document.getElementById('take_picture_container');
 				takePicContainer.style.width = longer+'px';
 
@@ -174,6 +177,7 @@ function qrSignature(){
 				document.getElementById('take_picture_container').style.display = 'block';
 				
 			} else {
+				takeDocSignPicture();
 				/*loaderContainer = document.getElementById("sk-folding-cube-container");
 				loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
 				loaderContainer.style.height = (window.innerWidth-window.innerWidth/2)+"px";
@@ -531,8 +535,9 @@ function qrSignature(){
 		var start = new Date().getTime();
 
 		returnObj = {};
-		returnObj.x = leftX-(QRRatio*4.813);
+		returnObj.x = leftX-(QRRatio*4.7);
 		returnObj.y = leftY;
+		
 		return returnObj;
 		pixColor = operationContext.getImageData(leftX, leftY, 1, 1).data[0];
 		newColor = pixColor;
@@ -610,10 +615,11 @@ function qrSignature(){
 				}
 			}
 		}
+		operationContext.fillStyle = 'yellow';
 		operationContext.fillRect(leftTopX,leftTopY,10,10);
 		returnObj = {}
 		returnObj.x = leftTopX;
-		returnObj.y = leftTopY;
+		returnObj.y = leftTopY+10;
 		returnObj.newColor = newColor;
 		var end = new Date().getTime();
 		var time = end - start;
@@ -641,6 +647,7 @@ function qrSignature(){
 		returnObj.x = leftTopX;
 		returnObj.y = leftTopY;
 		returnObj.newColor = newColor;
+
 		var end = new Date().getTime();
 		var time = end - start;
 		console.log('Right time: '+time);
@@ -673,7 +680,7 @@ function qrSignature(){
 		leftDownY -= 2;
 		returnObj.x = leftSideX;
 		returnObj.y = leftDownY;
-		alert(leftDownY);
+		operationContext.fillRect(returnObj.x,returnObj.y,10,10);
 		return returnObj;
 	}
 	function sendSignature(imgData) {
@@ -723,9 +730,10 @@ function qrSignature(){
 		//bottomPos = getTheBottomBorder(leftSide.x,leftSide.y,leftSide.newColor);
 		//Test the new method
 		bottomPos = {};
-		bottomPos.y = QRRatio*3.306;
+		bottomPos.y = leftSide.y+QRRatio*3.306;
 		//bottomPos.y = leftSide.y+((rightBorder.x-leftSide.x)/4);
 		bottomPos.x = leftSide.x;
+		operationContext.fillRect(bottomPos.x,bottomPos.y,10,10);
 		//return false;
 		leftX = bottomPos.x;
 		leftDownY = bottomPos.y;
@@ -766,7 +774,7 @@ function qrSignature(){
 	/*Rotate to horizontal by the two top markers*/
 	function rotateToHorizontal(){
 		var start = new Date().getTime();
-		console.log(qrcode.patternPos);
+		
 		var pointA = {};
 		var pointB = {};
 		var lastPatternIndex = qrcode.patternPos.length-1;
@@ -815,14 +823,12 @@ function qrSignature(){
 		//operationContext.drawImage(canvas,0,0,-canvas.width/5,-canvas.height/5,0,0,-canvas.width/5,-canvas.height/5); //itt kell kicsinyíteni - próba
 		//operationContext.drawImage(canvas,-canvas.width/2,-canvas.height/2); //itt kell kicsinyíteni - próba
 		operationContext.drawImage(originalCanvas, 0, 0,canvas.width/canvasRatio,canvas.height/canvasRatio);
-		operationContext.restore();
+		//operationContext.restore();
 		
 		/*creating the "blue"*/
 		
 		context.fillStyle = 'blue';
 		context.fillRect( qrcode.patternPos[lastPatternIndex][1].x, qrcode.patternPos[lastPatternIndex][1].y, 2, 2);
-		context.fillStyle = 'red';
-		context.fillRect( qrcode.patternPos[lastPatternIndex][2].x, qrcode.patternPos[lastPatternIndex][2].y, 2, 2);
 		//context.save();
 		context.translate(canvas.width/2,canvas.height/2);
 		context.rotate(rotationDir*rotationDegree*Math.PI/180);
@@ -890,7 +896,7 @@ function qrSignature(){
 			}			
 		}
 		try{
-			//imageColorCorrection(context);
+			imageColorCorrection(context);
 			contrastImage(context,100);
 			var start = new Date().getTime();
 			qrcode.decode();
@@ -906,6 +912,14 @@ function qrSignature(){
 				document.getElementById("input").style.display = 'block';
 				document.getElementById("take_picture_container").style.display = 'block';
 				document.getElementById("sk-folding-cube-container").style.display = 'none';
+				document.getElementById("browser_mode").style.display = 'none';
+			} else {
+				//Browser mode
+				document.getElementById('status').style.color = 'red';
+				document.getElementById('status').innerHTML = 'QR code recognize failed, please try again. Error message:'+e;
+				photoTaked = false;
+				document.getElementById("sk-folding-cube-container").style.display = 'none';
+				document.getElementById("browser_mode").style.display = 'block';
 			}
 		}
 	}
@@ -924,10 +938,10 @@ function qrSignature(){
 		document.getElementById('take_picture_container').style.display = 'none';
 		document.getElementById('turn_phone').style.display = 'none';
 		//Browser detection
-		if(isMobileBrowser()) {
+		//if(isMobileBrowser()) {
 			noUserMedia();
 			return false;
-		}
+		//}
 		cameraMode = true;
 		navigator.getUserMedia = (navigator.getUserMedia || 
 								 navigator.webkitGetUserMedia || 
@@ -1034,27 +1048,21 @@ function qrSignature(){
     //resizeCanvas();
 	//checkUserMedia();
 	function noUserMedia(){
-		input = document.getElementById("input");
-		input.addEventListener("change", handleFile);
-		/*input_btn = document.getElementById("input");
-		input_btn.style.height = window.innerHeight-window.innerHeight/2+"px";
-		input_btn.style.width = window.innerHeight-window.innerHeight/2+"px";
-		input_btn.style.backgroundSize = "\""+(window.innerHeight-window.innerHeight/2)+"px\"";
-		btn_container = document.getElementById("file_button");
-		btn_container.style.display = "block";
-		btn_container.style.top = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
-		btn_container.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";
-		btn_container.style.backgroundSize = (window.innerHeight-window.innerHeight/2)+"px";*/
-		document.getElementById("input").style.display = "block";
-		loaderContainer = document.getElementById("sk-folding-cube-container");
-		/*loaderContainer.style.width = (window.innerHeight-window.innerHeight/2)+"px";
-		loaderContainer.style.height = (window.innerHeight-window.innerHeight/2)+"px";
-		loaderContainer.style.top = (window.innerHeight-(window.innerHeight-window.innerHeight/2))/2+"px";
-		loaderContainer.style.left = (window.innerWidth-(window.innerHeight-window.innerHeight/2))/2+"px";*/
+		if(isMobileBrowser()) {
+			input = document.getElementById("input");
+			input.addEventListener("change", handleFile);
+			input.style.display = "block";
+		} else {
+			document.getElementById("browser_mode").style.display = "block";
+			input = document.getElementById("input_browser");
+			input.addEventListener("change", handleFile);
+			input.style.display = "block";
+		}
 	}
 	function handleFile(e) {
 		photoTaked = true;
 		document.getElementById("file_button").style.display = 'none';
+		document.getElementById("browser_mode").style.display = "none";
 		document.getElementById("sk-folding-cube-container").style.display = 'block';
 		
 		setTimeout(function(){loadFile(e); }, 500);
