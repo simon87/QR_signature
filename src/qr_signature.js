@@ -99,12 +99,12 @@ function qrSignature(){
 		input_btn.style.backgroundSize = "\""+(longer/8)+"px\"";
 		
 		btn_container = document.getElementById("file_button");
-		/*btn_container.style.display = "block";
+		btn_container.style.display = "block";
 		btn_container.style.top = ((strait)/2-(longer/8/2))+"px";
 		btn_container.style.right = "10px";
 		btn_container.style.backgroundSize = (longer/8)+"px";
 		btn_container.style.width = longer/8+"px";
-		btn_container.style.height = longer/8+"px";*/
+		btn_container.style.height = longer/8+"px";
 		takePicContainer = document.getElementById('take_picture_container');
 		takePicContainer.style.width = strait+'px';
 
@@ -141,6 +141,7 @@ function qrSignature(){
 				//document.getElementById('turn_image').removeAttribute('width');
 				//alert(document.getElementById('turn_image').width);
 				document.getElementById('take_picture_container').style.display = 'none';
+				document.getElementById('turn_image_doc').style.display = 'block';
 				//document.getElementById("file_button").style.display = 'none';
 			} else {
 				document.getElementById('turn_phone').style.display = 'block';
@@ -153,6 +154,7 @@ function qrSignature(){
 		} else {
 			//document.getElementById('take_doc_picture').height = (window.innerWidth-50)+"px";
 			if(!photoTaked) {
+				document.getElementById('turn_image_doc').style.display = 'none';
 				return false;
 				document.getElementById('take_picture_container').style.display = 'block';
 				document.getElementById('turn_phone').style.display = 'none';
@@ -164,11 +166,11 @@ function qrSignature(){
 				
 				btn_container = document.getElementById("file_button");
 				btn_container.style.display = "block";
-				/*btn_container.style.top = (100)+"px";
+				btn_container.style.top = (100)+"px";
 				btn_container.style.right = "10px";
 				btn_container.style.backgroundSize = (strait/8)+"px";
 				btn_container.style.width = strait/8+"px";
-				btn_container.style.height = strait/8+"px";*/
+				btn_container.style.height = strait/8+"px";
 				takePicContainer = document.getElementById('take_picture_container');
 				takePicContainer.style.width = longer+'px';
 
