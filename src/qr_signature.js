@@ -21,6 +21,18 @@ function sendDocSignature() {
 	var str = unescape(encodeURIComponent(finalDocImageBase64));
 	var enc_str = mcrypt.Encrypt(str, '', CryptoJS.MD5(cryptKey+unique_identifier+document.getElementById('pin').value).toString(), 'rijndael-256', 'ecb');
 	enc_str = btoa(enc_str);
+	//Encrypt - new
+	/*
+	1. generate the base 64 of the original image
+	2. generate md5 of base 64
+	3. append  md5 to the base64
+	4. encrypt
+	5. base64 of encrypted data
+	*/
+	md5OfBase64 =  CryptoJS.MD5(str);
+	appendMd5ToBase64 = str+md5OfBase64;
+	encryptAppendedMd5ToBase64 = mcrypt.Encrypt(appendMd5ToBase64);
+	enc_str = btoa(encryptAppendedMd5ToBase64);
 	var xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function() {
 		if (xhr.readyState == 4 && xhr.status == 200) {
@@ -99,12 +111,12 @@ function qrSignature(){
 		input_btn.style.backgroundSize = "\""+(longer/8)+"px\"";
 		
 		btn_container = document.getElementById("file_button");
-		btn_container.style.display = "block";
+		/*btn_container.style.display = "block";
 		btn_container.style.top = ((strait)/2-(longer/8/2))+"px";
 		btn_container.style.right = "10px";
 		btn_container.style.backgroundSize = (longer/8)+"px";
 		btn_container.style.width = longer/8+"px";
-		btn_container.style.height = longer/8+"px";
+		btn_container.style.height = longer/8+"px";*/
 		takePicContainer = document.getElementById('take_picture_container');
 		takePicContainer.style.width = strait+'px';
 
@@ -141,7 +153,6 @@ function qrSignature(){
 				//document.getElementById('turn_image').removeAttribute('width');
 				//alert(document.getElementById('turn_image').width);
 				document.getElementById('take_picture_container').style.display = 'none';
-				document.getElementById('turn_image_doc').style.display = 'block';
 				//document.getElementById("file_button").style.display = 'none';
 			} else {
 				document.getElementById('turn_phone').style.display = 'block';
@@ -154,7 +165,6 @@ function qrSignature(){
 		} else {
 			//document.getElementById('take_doc_picture').height = (window.innerWidth-50)+"px";
 			if(!photoTaked) {
-				document.getElementById('turn_image_doc').style.display = 'none';
 				return false;
 				document.getElementById('take_picture_container').style.display = 'block';
 				document.getElementById('turn_phone').style.display = 'none';
@@ -166,11 +176,11 @@ function qrSignature(){
 				
 				btn_container = document.getElementById("file_button");
 				btn_container.style.display = "block";
-				btn_container.style.top = (100)+"px";
+				/*btn_container.style.top = (100)+"px";
 				btn_container.style.right = "10px";
 				btn_container.style.backgroundSize = (strait/8)+"px";
 				btn_container.style.width = strait/8+"px";
-				btn_container.style.height = strait/8+"px";
+				btn_container.style.height = strait/8+"px";*/
 				takePicContainer = document.getElementById('take_picture_container');
 				takePicContainer.style.width = longer+'px';
 
@@ -329,6 +339,18 @@ function qrSignature(){
 		str = unescape(encodeURIComponent(imgData));
 		enc_str = mcrypt.Encrypt(str, '', CryptoJS.MD5(cryptKey+unique_identifier+document.getElementById('pin').value).toString(), 'rijndael-256', 'ecb');
 		enc_str = btoa(enc_str);
+		//Encrypt - new
+		/*
+		1. generate the base 64 of the original image
+		2. generate md5 of base 64
+		3. append  md5 to the base64
+		4. encrypt
+		5. base64 of encrypted data
+		*/
+		md5OfBase64 =  CryptoJS.MD5(str);
+		appendMd5ToBase64 = str+md5OfBase64;
+		encryptAppendedMd5ToBase64 = mcrypt.Encrypt(appendMd5ToBase64, '', CryptoJS.MD5(cryptKey+unique_identifier+document.getElementById('pin').value).toString(), 'rijndael-256', 'ecb');
+		enc_str = btoa(encryptAppendedMd5ToBase64);
 		var xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == 4 && xhr.status == 200) {
@@ -691,6 +713,18 @@ function qrSignature(){
 		str = unescape(encodeURIComponent(imgData));
 		enc_str = mcrypt.Encrypt(str, '', CryptoJS.MD5(cryptKey+unique_identifier).toString(), 'rijndael-256', 'ecb');
 		enc_str = btoa(enc_str);
+		//Encrypt - new
+		/*
+		1. generate the base 64 of the original image
+		2. generate md5 of base 64
+		3. append  md5 to the base64
+		4. encrypt
+		5. base64 of encrypted data
+		*/
+		md5OfBase64 =  CryptoJS.MD5(str);
+		appendMd5ToBase64 = str+md5OfBase64;
+		encryptAppendedMd5ToBase64 = mcrypt.Encrypt(appendMd5ToBase64, '', CryptoJS.MD5(cryptKey+unique_identifier).toString(), 'rijndael-256', 'ecb');
+		enc_str = btoa(encryptAppendedMd5ToBase64);
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', signatureUrl, true);
 		xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
